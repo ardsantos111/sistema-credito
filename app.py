@@ -1,10 +1,11 @@
 import os
+import io
 import psycopg2
 from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
-import pdfkit
 from werkzeug.security import generate_password_hash, check_password_hash
+from weasyprint import HTML
 
 app = Flask(__name__)
 
@@ -27,7 +28,7 @@ class User(UserMixin):
 def get_db_connection():
     try:
         database_url = app.config['DATABASE_URL']
-        if database_url.startswith("postgres://"):
+        if database_url and database_url.startswith("postgres://"):
             database_url = database_url.replace("postgres://", "postgresql://", 1)
         return psycopg2.connect(database_url)
     except Exception as e:
@@ -54,7 +55,6 @@ def load_user(user_id):
         print(f"Erro ao carregar usuário: {str(e)}")
         return None
 
-# Rotas da aplicação
 @app.route('/')
 def home():
     if current_user.is_authenticated:
@@ -144,22 +144,27 @@ def vendas():
             return redirect(url_for('vendas'))
         
         try:
+            # Dados do formulário
             cliente_id = request.form['cliente_id']
             valor_total = float(request.form['valor_total'])
+            valor_entrada = float(request.form.get('valor_entrada', 0))
             num_parcelas = int(request.form['num_parcelas'])
             
             cur = conn.cursor()
             # Inserir venda
             cur.execute("""
-                INSERT INTO vendas (cliente_id, empresa_id, valor_total, num_parcelas, data_venda, status)
-                VALUES (%s, %s, %s, %s, %s, 'ativa')
+                INSERT INTO vendas (cliente_id, empresa_id, valor_total, valor_entrada, 
+                                  num_parcelas, data_venda, status)
+                VALUES (%s, %s, %s, %s, %s, %s, 'ativa')
                 RETURNING id
-            """, (cliente_id, current_user.empresa_id, valor_total, num_parcelas, datetime.now()))
+            """, (cliente_id, current_user.empresa_id, valor_total, valor_entrada,
+                 num_parcelas, datetime.now()))
             
             venda_id = cur.fetchone()[0]
             
             # Criar parcelas
-            valor_parcela = valor_total / num_parcelas
+            valor_restante = valor_total - valor_entrada
+            valor_parcela = valor_restante / num_parcelas
             data_vencimento = datetime.now()
             
             for i in range(num_parcelas):
@@ -242,13 +247,13 @@ def gerar_contrato(venda_id):
                              venda=venda_data,
                              parcelas=parcelas)
         
-        pdf = pdfkit.from_string(html, False)
+        pdf = HTML(string=html).write_pdf()
         
         return send_file(
-            pdf,
+            io.BytesIO(pdf),
             mimetype='application/pdf',
-            as_attachment=True,
-            attachment_filename=f'contrato_venda_{venda_id}.pdf'
+            download_name=f'contrato_venda_{venda_id}.pdf',
+            as_attachment=True
         )
         
     except Exception as e:
@@ -262,7 +267,6 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-# Tratamento de erros
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('404.html'), 404
