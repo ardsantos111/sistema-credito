@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Pagamentos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .filter-section {
+            margin-bottom: 2em;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1em;
+            align-items: center;
+        }
+        .filter-section input, .filter-section select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .filter-section button {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        .status-badge.pago { background-color: #28a745; }
+        .status-badge.a-vencer { background-color: #007bff; }
+        .status-badge.atrasado { background-color: #dc3545; }
+        .pagamentos-table-container {
+            margin-top: 2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gerenciar Pagamentos</h1>
+            <nav>
+                <a href="{{ url_for('home') }}">Dashboard</a>
+                <a href="{{ url_for('vendas') }}">Nova Venda</a>
+                <a href="{{ url_for('logout') }}">Sair</a>
+            </nav>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flashes">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        <div class="filter-section">
+            <form action="{{ url_for('gerenciar_pagamentos') }}" method="get">
+                <input type="text" name="search_cliente" placeholder="Buscar por cliente..." value="{{ search_cliente }}">
+                <select name="status_filtro">
+                    <option value="">Todos os Status</option>
+                    <option value="a vencer" {% if status_filtro == 'a vencer' %}selected{% endif %}>A Vencer</option>
+                    <option value="atrasado" {% if status_filtro == 'atrasado' %}selected{% endif %}>Atrasado</option>
+                    <option value="pago" {% if status_filtro == 'pago' %}selected{% endif %}>Pago</option>
+                </select>
+                <button type="submit">Filtrar</button>
+            </form>
+        </div>
+
+        <div class="pagamentos-table-container">
+            <h2>Todas as Parcelas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Nº Parcela</th>
+                        <th>Valor</th>
+                        <th>Vencimento</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pagamento in pagamentos %}
+                    <tr>
+                        <td>{{ pagamento.nome_cliente }}</td>
+                        <td>{{ pagamento.num_parcela }}</td>
+                        <td>R$ {{ "%.2f"|format(pagamento.valor_parcela) }}</td>
+                        <td>{{ pagamento.data_vencimento }}</td>
+                        <td>
+                            {% if pagamento.status == 'pago' %}
+                                <span class="status-badge pago">Pago</span>
+                            {% elif pagamento.data_vencimento < hoje and pagamento.status == 'a vencer' %}
+                                <span class="status-badge atrasado">Atrasado</span>
+                            {% else %}
+                                <span class="status-badge a-vencer">A Vencer</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if pagamento.status != 'pago' %}
+                            <form action="{{ url_for('marcar_pago', pagamento_id=pagamento.id) }}" method="post" style="display:inline;">
+                                <button type="submit" onclick="return confirm('Tem certeza que deseja marcar esta parcela como PAGA?')" class="btn-small">Marcar como Pago</button>
+                            </form>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

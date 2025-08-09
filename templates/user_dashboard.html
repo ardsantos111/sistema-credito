@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel do Usuário</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .table-container { margin-top: 2em; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 0.75em; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .vencido { color: #dc3545; font-weight: bold; } /* Vermelho para vencido */
+        .a-vencer { color: #ffc107; font-weight: bold; } /* Amarelo para a vencer */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Painel do Usuário</h1>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Sair</a>
+        </header>
+
+        <p>Olá, {{ current_user.username }}! Bem-vindo(a)!</p>
+        <p>Você pode acessar a página de entrada de vendas aqui:</p>
+        <a href="{{ url_for('vendas') }}" class="btn-add-sale">Ir para a Entrada de Vendas</a>
+        
+        <div class="table-container">
+            <h2>Pagamentos Vencidos</h2>
+            {% if vencidos %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Valor</th>
+                            <th>Vencimento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pagamento in vencidos %}
+                        <tr class="vencido">
+                            <td>{{ pagamento[0] }}</td>
+                            <td>R$ {{ "%.2f"|format(pagamento[1]) }}</td>
+                            <td>{{ pagamento[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Nenhum pagamento vencido no momento.</p>
+            {% endif %}
+        </div>
+        
+        <div class="table-container">
+            <h2>Pagamentos a Vencer neste Mês</h2>
+            {% if a_vencer_mes %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Valor</th>
+                            <th>Vencimento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pagamento in a_vencer_mes %}
+                        <tr class="a-vencer">
+                            <td>{{ pagamento[0] }}</td>
+                            <td>R$ {{ "%.2f"|format(pagamento[1]) }}</td>
+                            <td>{{ pagamento[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Nenhum pagamento a vencer neste mês.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Master</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .summary-cards {
+            display: flex;
+            justify-content: space-around;
+            gap: 1em;
+            margin-bottom: 2em;
+        }
+        .card {
+            background-color: #f4f4f4;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 1.5em;
+            text-align: center;
+            flex: 1;
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .card p {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+        .table-container {
+            margin-top: 2em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1em;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .filtro-container {
+            margin-bottom: 2em;
+            text-align: right;
+        }
+        .filtro-container select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dashboard Master</h1>
+            <nav>
+                <a href="{{ url_for('vendas') }}">Nova Venda</a>
+                <a href="{{ url_for('gerenciar_pagamentos') }}">Gerenciar Pagamentos</a>
+                <a href="{{ url_for('configuracoes') }}">Configurações</a>
+                <a href="{{ url_for('logout') }}">Sair</a>
+            </nav>
+        </header>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flashes">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="filtro-container">
+            <form action="{{ url_for('master_dashboard') }}" method="get">
+                <label for="filtro_usuario">Filtrar por Usuário:</label>
+                <select name="user_id" id="filtro_usuario" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    {% for usuario in usuarios %}
+                        <option value="{{ usuario[0] }}" {% if filtro_ativo == usuario[0] %}selected{% endif %}>
+                            {{ usuario[1] }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        <div class="summary-cards">
+            <div class="card">
+                <h3>Total de Vendas</h3>
+                <p>R$ {{ "%.2f"|format(total_vendas) }}</p>
+            </div>
+            <div class="card">
+                <h3>Total Recebido</h3>
+                <p>R$ {{ "%.2f"|format(total_recebido) }}</p>
+            </div>
+            <div class="card" style="background-color: #ffcccc;">
+                <h3>Total Atrasado</h3>
+                <p>R$ {{ "%.2f"|format(total_atrasados) }}</p>
+            </div>
+            <div class="card">
+                <h3>Total a Receber</h3>
+                <p>R$ {{ "%.2f"|format(total_a_receber) }}</p>
+            </div>
+        </div>
+        
+        {% if pagamentos_atrasados %}
+        <div class="table-container">
+            <h2>Pagamentos Atrasados</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Valor</th>
+                        <th>Vencimento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pagamento in pagamentos_atrasados %}
+                    <tr>
+                        <td>{{ pagamento[0] }}</td>
+                        <td>R$ {{ "%.2f"|format(pagamento[1]) }}</td>
+                        <td>{{ pagamento[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <div class="table-container">
+            <h2>Últimas 10 Vendas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Venda</th>
+                        <th>Cliente</th>
+                        <th>Valor Total</th>
+                        <th>Entrada</th>
+                        <th>Nº Parcelas</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venda in vendas_recentes %}
+                    <tr>
+                        <td>{{ venda[0] }}</td>
+                        <td>{{ venda[1] }}</td>
+                        <td>R$ {{ "%.2f"|format(venda[2]) }}</td>
+                        <td>R$ {{ "%.2f"|format(venda[3]) }}</td>
+                        <td>{{ venda[4] }}</td>
+                        <td>{{ venda[5] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
