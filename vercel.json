@@ -1,7 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "pip install --no-cache-dir -r requirements.txt",
-  "devCommand": "python app.py",
   "builds": [
     {
       "src": "app.py",
