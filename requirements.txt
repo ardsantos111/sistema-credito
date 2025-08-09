@@ -1,4 +1,4 @@
 Flask
 Flask-Login
-WeasyPrint
 psycopg2-binary
+pdfkit

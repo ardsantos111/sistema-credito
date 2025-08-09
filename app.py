@@ -1,13 +1,13 @@
 import os
 import psycopg2
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, make_response
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import pdfkit
 from datetime import datetime
 
 app = Flask(__name__)
 
-# Configuração de ambiente da Vercel
+# Configuração para Vercel
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['DATABASE_URL'] = os.environ.get('DATABASE_URL')
 
@@ -26,11 +26,6 @@ def get_db_connection():
     conn = psycopg2.connect(app.config['DATABASE_URL'])
     return conn
 
-# A Vercel procura por esta variável 'app' para rodar
-# Garanta que esta linha existe!
-# app = Flask(__name__)
-
-# --- Funções de Usuário para Flask-Login ---
 @login_manager.user_loader
 def load_user(user_id):
     conn = get_db_connection()
@@ -82,10 +77,8 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def user_dashboard():
-    # Obtém o ID da empresa do usuário logado
     empresa_id = current_user.empresa_id
     
-    # Lógica para obter vendas e clientes da empresa específica
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT * FROM vendas WHERE empresa_id = %s ORDER BY data_venda DESC;", (empresa_id,))
@@ -129,7 +122,6 @@ def vendas():
     conn.close()
     return render_template('vendas.html', vendas=vendas_com_cliente)
 
-# --- Gerar Contrato PDF (Requer WeasyPrint) ---
 @app.route('/contrato/<int:venda_id>')
 @login_required
 def gerar_contrato(venda_id):
@@ -156,17 +148,13 @@ def gerar_contrato(venda_id):
     
     html_template = render_template('contrato_pdf.html', venda=venda)
     
-    # Configuração do WeasyPrint
-    config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe') # Altere o caminho se necessário
-    
-    pdf = pdfkit.from_string(html_template, False, configuration=config)
+    # A Vercel já tem o wkhtmltopdf, então removemos a configuração de caminho local
+    pdf = pdfkit.from_string(html_template, False)
     
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'inline; filename=contrato_venda_{venda["id"]}.pdf'
     return response
 
-# Ponto de entrada padrão para desenvolvimento local
-# Isso é o que a Vercel usa para encontrar sua aplicação
 if __name__ == "__main__":
     app.run(debug=True)
