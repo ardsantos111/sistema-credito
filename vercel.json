@@ -1,19 +1,14 @@
 {
   "version": 2,
+  "buildCommand": "pip install --no-cache-dir -r requirements.txt",
+  "devCommand": "python app.py",
   "builds": [
     {
       "src": "app.py",
       "use": "@vercel/python@3.1.0",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.9",
-        "build": {
-          "env": {
-            "PIP_TARGET": ".",
-            "PYTHON_VERSION": "3.9"
-          },
-          "command": "pip install --no-cache-dir -r requirements.txt"
-        }
+        "runtime": "python3.9"
       }
     }
   ],
@@ -24,6 +19,7 @@
     }
   ],
   "env": {
-    "PYTHON_VERSION": "3.9"
+    "PYTHON_VERSION": "3.9",
+    "PIP_TARGET": "."
   }
 }
