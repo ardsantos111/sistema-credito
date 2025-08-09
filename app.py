@@ -53,6 +53,8 @@ def load_user(user_id):
         return None
     except Exception as e:
         print(f"Erro ao carregar usuário: {str(e)}")
+        if conn:
+            conn.close()
         return None
 
 @app.route('/')
