@@ -1,16 +1,18 @@
 import os
 import psycopg2
-from flask import Flask, render_template, request, redirect, url_for, flash, session, make_response
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from datetime import datetime, timedelta
 import pdfkit
-from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
-# Configuração para Vercel
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+# Configurações
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'chave_secreta_temporaria')
 app.config['DATABASE_URL'] = os.environ.get('DATABASE_URL')
 
+# Configuração do Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -23,37 +25,40 @@ class User(UserMixin):
         self.empresa_id = empresa_id
 
 def get_db_connection():
-    conn = psycopg2.connect(app.config['DATABASE_URL'])
-    return conn
+    try:
+        database_url = app.config['DATABASE_URL']
+        if database_url.startswith("postgres://"):
+            database_url = database_url.replace("postgres://", "postgresql://", 1)
+        return psycopg2.connect(database_url)
+    except Exception as e:
+        print(f"Erro na conexão com o banco: {str(e)}")
+        return None
 
 @login_manager.user_loader
 def load_user(user_id):
     conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT id, email, password, empresa_id FROM users WHERE id = %s;", (user_id,))
-    user_data = cur.fetchone()
-    cur.close()
-    conn.close()
-    if user_data:
-        return User(user_data[0], user_data[1], user_data[2], user_data[3])
-    return None
+    if not conn:
+        return None
+    
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id, email, password, empresa_id FROM users WHERE id = %s", (user_id,))
+        user_data = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if user_data:
+            return User(user_data[0], user_data[1], user_data[2], user_data[3])
+        return None
+    except Exception as e:
+        print(f"Erro ao carregar usuário: {str(e)}")
+        return None
 
-def get_user_by_email(email):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT id, email, password, empresa_id FROM users WHERE email = %s;", (email,))
-    user_data = cur.fetchone()
-    cur.close()
-    conn.close()
-    if user_data:
-        return User(user_data[0], user_data[1], user_data[2], user_data[3])
-    return None
-
-# --- Rotas da Aplicação ---
+# Rotas da aplicação
 @app.route('/')
 def home():
     if current_user.is_authenticated:
-        return redirect(url_for('user_dashboard'))
+        return redirect(url_for('dashboard'))
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -61,12 +66,195 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        user = get_user_by_email(email)
-        if user and user.password == password:
-            login_user(user)
-            return redirect(url_for('user_dashboard'))
-        flash('Email ou senha incorretos.', 'danger')
+        
+        conn = get_db_connection()
+        if not conn:
+            flash('Erro ao conectar ao banco de dados', 'error')
+            return redirect(url_for('login'))
+        
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT id, email, password, empresa_id FROM users WHERE email = %s", (email,))
+            user_data = cur.fetchone()
+            cur.close()
+            conn.close()
+            
+            if user_data and check_password_hash(user_data[2], password):
+                user = User(user_data[0], user_data[1], user_data[2], user_data[3])
+                login_user(user)
+                return redirect(url_for('dashboard'))
+            
+            flash('Email ou senha incorretos', 'error')
+        except Exception as e:
+            flash('Erro ao realizar login', 'error')
+            print(f"Erro no login: {str(e)}")
+        
     return render_template('login.html')
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    conn = get_db_connection()
+    if not conn:
+        flash('Erro ao conectar ao banco de dados', 'error')
+        return redirect(url_for('home'))
+    
+    try:
+        cur = conn.cursor()
+        # Buscar vendas recentes
+        cur.execute("""
+            SELECT v.id, c.nome, v.valor_total, v.data_venda, v.status 
+            FROM vendas v 
+            JOIN clientes c ON v.cliente_id = c.id 
+            WHERE v.empresa_id = %s 
+            ORDER BY v.data_venda DESC 
+            LIMIT 10
+        """, (current_user.empresa_id,))
+        vendas_recentes = cur.fetchall()
+        
+        # Buscar pagamentos pendentes
+        cur.execute("""
+            SELECT c.nome, p.valor, p.data_vencimento 
+            FROM pagamentos p 
+            JOIN vendas v ON p.venda_id = v.id 
+            JOIN clientes c ON v.cliente_id = c.id 
+            WHERE v.empresa_id = %s AND p.status = 'pendente' 
+            ORDER BY p.data_vencimento
+        """, (current_user.empresa_id,))
+        pagamentos_pendentes = cur.fetchall()
+        
+        cur.close()
+        conn.close()
+        
+        return render_template('dashboard.html', 
+                             vendas_recentes=vendas_recentes,
+                             pagamentos_pendentes=pagamentos_pendentes)
+    except Exception as e:
+        flash('Erro ao carregar dashboard', 'error')
+        print(f"Erro no dashboard: {str(e)}")
+        return redirect(url_for('home'))
+
+@app.route('/vendas', methods=['GET', 'POST'])
+@login_required
+def vendas():
+    if request.method == 'POST':
+        conn = get_db_connection()
+        if not conn:
+            flash('Erro ao conectar ao banco de dados', 'error')
+            return redirect(url_for('vendas'))
+        
+        try:
+            cliente_id = request.form['cliente_id']
+            valor_total = float(request.form['valor_total'])
+            num_parcelas = int(request.form['num_parcelas'])
+            
+            cur = conn.cursor()
+            # Inserir venda
+            cur.execute("""
+                INSERT INTO vendas (cliente_id, empresa_id, valor_total, num_parcelas, data_venda, status)
+                VALUES (%s, %s, %s, %s, %s, 'ativa')
+                RETURNING id
+            """, (cliente_id, current_user.empresa_id, valor_total, num_parcelas, datetime.now()))
+            
+            venda_id = cur.fetchone()[0]
+            
+            # Criar parcelas
+            valor_parcela = valor_total / num_parcelas
+            data_vencimento = datetime.now()
+            
+            for i in range(num_parcelas):
+                data_vencimento += timedelta(days=30)
+                cur.execute("""
+                    INSERT INTO pagamentos (venda_id, valor, data_vencimento, status)
+                    VALUES (%s, %s, %s, 'pendente')
+                """, (venda_id, valor_parcela, data_vencimento))
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            flash('Venda registrada com sucesso!', 'success')
+            return redirect(url_for('gerar_contrato', venda_id=venda_id))
+            
+        except Exception as e:
+            flash('Erro ao registrar venda', 'error')
+            print(f"Erro ao registrar venda: {str(e)}")
+            return redirect(url_for('vendas'))
+    
+    # GET request
+    conn = get_db_connection()
+    if not conn:
+        flash('Erro ao conectar ao banco de dados', 'error')
+        return redirect(url_for('dashboard'))
+    
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id, nome FROM clientes WHERE empresa_id = %s", (current_user.empresa_id,))
+        clientes = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        return render_template('vendas.html', clientes=clientes)
+    except Exception as e:
+        flash('Erro ao carregar página de vendas', 'error')
+        print(f"Erro na página de vendas: {str(e)}")
+        return redirect(url_for('dashboard'))
+
+@app.route('/gerar_contrato/<int:venda_id>')
+@login_required
+def gerar_contrato(venda_id):
+    conn = get_db_connection()
+    if not conn:
+        flash('Erro ao conectar ao banco de dados', 'error')
+        return redirect(url_for('vendas'))
+    
+    try:
+        cur = conn.cursor()
+        # Buscar dados da venda
+        cur.execute("""
+            SELECT v.*, c.nome, c.cpf, c.endereco, e.nome_empresa, e.cnpj
+            FROM vendas v
+            JOIN clientes c ON v.cliente_id = c.id
+            JOIN empresas e ON v.empresa_id = e.id
+            WHERE v.id = %s AND v.empresa_id = %s
+        """, (venda_id, current_user.empresa_id))
+        
+        venda_data = cur.fetchone()
+        
+        if not venda_data:
+            flash('Venda não encontrada', 'error')
+            return redirect(url_for('vendas'))
+        
+        # Buscar parcelas
+        cur.execute("""
+            SELECT valor, data_vencimento
+            FROM pagamentos
+            WHERE venda_id = %s
+            ORDER BY data_vencimento
+        """, (venda_id,))
+        parcelas = cur.fetchall()
+        
+        cur.close()
+        conn.close()
+        
+        # Gerar PDF
+        html = render_template('contrato_pdf.html',
+                             venda=venda_data,
+                             parcelas=parcelas)
+        
+        pdf = pdfkit.from_string(html, False)
+        
+        return send_file(
+            pdf,
+            mimetype='application/pdf',
+            as_attachment=True,
+            attachment_filename=f'contrato_venda_{venda_id}.pdf'
+        )
+        
+    except Exception as e:
+        flash('Erro ao gerar contrato', 'error')
+        print(f"Erro ao gerar contrato: {str(e)}")
+        return redirect(url_for('vendas'))
 
 @app.route('/logout')
 @login_required
@@ -74,87 +262,15 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-@app.route('/dashboard')
-@login_required
-def user_dashboard():
-    empresa_id = current_user.empresa_id
-    
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM vendas WHERE empresa_id = %s ORDER BY data_venda DESC;", (empresa_id,))
-    vendas = cur.fetchall()
-    cur.execute("SELECT id, nome_cliente FROM clientes WHERE empresa_id = %s;", (empresa_id,))
-    clientes = cur.fetchall()
-    cur.close()
-    conn.close()
-    
-    return render_template('user_dashboard.html', vendas=vendas, clientes=clientes)
+# Tratamento de erros
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
 
-@app.route('/nova_venda', methods=['POST'])
-@login_required
-def nova_venda():
-    empresa_id = current_user.empresa_id
-    if request.method == 'POST':
-        cliente_id = request.form.get('cliente')
-        valor = request.form['valor']
-        parcelas = request.form['parcelas']
-        data_venda = datetime.now()
-        
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("INSERT INTO vendas (cliente_id, valor, parcelas, data_venda, empresa_id) VALUES (%s, %s, %s, %s, %s);",
-                    (cliente_id, valor, parcelas, data_venda, empresa_id))
-        conn.commit()
-        cur.close()
-        conn.close()
-        flash('Venda adicionada com sucesso!', 'success')
-    return redirect(url_for('user_dashboard'))
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html'), 500
 
-@app.route('/vendas')
-@login_required
-def vendas():
-    empresa_id = current_user.empresa_id
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT v.id, c.nome_cliente, v.valor, v.parcelas, v.data_venda FROM vendas v JOIN clientes c ON v.cliente_id = c.id WHERE v.empresa_id = %s ORDER BY v.data_venda DESC;", (empresa_id,))
-    vendas_com_cliente = cur.fetchall()
-    cur.close()
-    conn.close()
-    return render_template('vendas.html', vendas=vendas_com_cliente)
-
-@app.route('/contrato/<int:venda_id>')
-@login_required
-def gerar_contrato(venda_id):
-    empresa_id = current_user.empresa_id
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT v.id, c.nome_cliente, e.nome_empresa, v.valor, v.parcelas, v.data_venda FROM vendas v JOIN clientes c ON v.cliente_id = c.id JOIN empresas e ON v.empresa_id = e.id WHERE v.id = %s AND v.empresa_id = %s;", (venda_id, empresa_id))
-    venda_data = cur.fetchone()
-    cur.close()
-    conn.close()
-    
-    if not venda_data:
-        flash('Venda não encontrada ou você não tem permissão para acessá-la.', 'danger')
-        return redirect(url_for('vendas'))
-        
-    venda = {
-        'id': venda_data[0],
-        'nome_cliente': venda_data[1],
-        'nome_empresa': venda_data[2],
-        'valor': venda_data[3],
-        'parcelas': venda_data[4],
-        'data_venda': venda_data[5]
-    }
-    
-    html_template = render_template('contrato_pdf.html', venda=venda)
-    
-    # A Vercel já tem o wkhtmltopdf, então removemos a configuração de caminho local
-    pdf = pdfkit.from_string(html_template, False)
-    
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f'inline; filename=contrato_venda_{venda["id"]}.pdf'
-    return response
-
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
