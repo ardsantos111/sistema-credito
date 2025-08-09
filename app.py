@@ -1,6 +1,7 @@
 import os
 import io
-import psycopg2
+import pg8000.dbapi
+from urllib.parse import urlparse
 from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
@@ -28,9 +29,14 @@ class User(UserMixin):
 def get_db_connection():
     try:
         database_url = app.config['DATABASE_URL']
-        if database_url and database_url.startswith("postgres://"):
-            database_url = database_url.replace("postgres://", "postgresql://", 1)
-        return psycopg2.connect(database_url)
+        url = urlparse(database_url)
+        return pg8000.dbapi.connect(
+            user=url.username,
+            password=url.password,
+            host=url.hostname,
+            port=url.port,
+            database=url.path[1:]
+        )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
         return None
