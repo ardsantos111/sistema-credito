@@ -26,6 +26,8 @@ class User(UserMixin):
         self.password = password
         self.empresa_id = empresa_id
 
+from urllib.parse import urlparse
+
 def get_db_connection():
     try:
         database_url = app.config['DATABASE_URL']
@@ -35,7 +37,8 @@ def get_db_connection():
             password=url.password,
             host=url.hostname,
             port=url.port,
-            database=url.path[1:]
+            database=url.path[1:],
+            ssl_context=True
         )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
