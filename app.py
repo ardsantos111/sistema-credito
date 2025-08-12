@@ -293,6 +293,14 @@ def not_found_error(error):
 def internal_error(error):
     return render_template('500.html'), 500
 
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # Log the full traceback
+    print(f"Unhandled Exception: {e}")
+    print(traceback.format_exc())
+    # Render a generic error page or re-raise for Flask's default 500 handler
+    return render_template('500.html'), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
