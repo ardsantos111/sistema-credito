@@ -43,7 +43,7 @@ def get_db_connection():
         )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
-        raise e
+        return None
 
 @login_manager.user_loader
 def load_user(user_id):
