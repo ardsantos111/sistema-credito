@@ -39,7 +39,7 @@ def get_db_connection():
             host=url.hostname,
             port=url.port,
             database=url.path[1:],
-            ssl_context=True
+            ssl_context=None
         )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
