@@ -148,7 +148,7 @@ def dashboard():
                              pagamentos_pendentes=pagamentos_pendentes)
     except Exception as e:
         flash('Erro ao carregar dashboard', 'error')
-        print(f"Erro no dashboard: {str(e)}")
+        print(f"Erro ao carregar dashboard: {str(e)}")
         return redirect(url_for('home'))
 
 @app.route('/vendas', methods=['GET', 'POST'])
@@ -220,63 +220,7 @@ def vendas():
     except Exception as e:
         flash('Erro ao carregar página de vendas', 'error')
         print(f"Erro na página de vendas: {str(e)}")
-        return redirect(url_for('dashboard'))
-
-#@app.route('/gerar_contrato/<int:venda_id>')
-#@login_required
-#def gerar_contrato(venda_id):
-#    conn = get_db_connection()
-#    if not conn:
-#        flash('Erro ao conectar ao banco de dados', 'error')
-#        return redirect(url_for('vendas'))
-#    
-#    try:
-#        cur = conn.cursor()
-#        # Buscar dados da venda
-#        cur.execute("""
-#            SELECT v.*, c.nome, c.cpf, c.endereco, e.nome_empresa, e.cnpj
-#            FROM vendas v
-#            JOIN clientes c ON v.cliente_id = c.id
-#            JOIN empresas e ON v.empresa_id = e.id
-#            WHERE v.id = %s AND v.empresa_id = %s
-#        """, (venda_id, current_user.empresa_id))
-#        
-#        venda_data = cur.fetchone()
-#        
-#        if not venda_data:
-#            flash('Venda não encontrada', 'error')
-#            return redirect(url_for('vendas'))
-#        
-#        # Buscar parcelas
-#        cur.execute("""
-#            SELECT valor, data_vencimento
-#            FROM pagamentos
-#            WHERE venda_id = %s
-#            ORDER BY data_vencimento
-#        """, (venda_id,))
-#        parcelas = cur.fetchall()
-#        
-#        cur.close()
-#        conn.close()
-#        
-#        # Gerar PDF
-#        html = render_template('contrato_pdf.html',
-#                             venda=venda_data,
-#                             parcelas=parcelas)
-#        
-#        pdf = HTML(string=html).write_pdf()
-#        
-#        return send_file(
-#            io.BytesIO(pdf),
-#            mimetype='application/pdf',
-#            download_name=f'contrato_venda_{venda_id}.pdf',
-#            as_attachment=True
-#        )
-#        
-#    except Exception as e:
-#        flash('Erro ao gerar contrato', 'error')
-#        print(f"Erro ao gerar contrato: {str(e)}")
-#        return redirect(url_for('vendas'))
+        return redirect(url_for('home'))
 
 @app.route('/logout')
 @login_required
