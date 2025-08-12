@@ -27,8 +27,6 @@ class User(UserMixin):
         self.password = password
         self.empresa_id = empresa_id
 
-from urllib.parse import urlparse
-
 def get_db_connection():
     try:
         database_url = app.config['DATABASE_URL']
@@ -39,7 +37,7 @@ def get_db_connection():
             host=url.hostname,
             port=url.port,
             database=url.path[1:],
-            ssl_context=None
+            ssl_context=True
         )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
@@ -148,7 +146,7 @@ def dashboard():
                              pagamentos_pendentes=pagamentos_pendentes)
     except Exception as e:
         flash('Erro ao carregar dashboard', 'error')
-        print(f"Erro ao carregar dashboard: {str(e)}")
+        print(f"Erro no dashboard: {str(e)}")
         return redirect(url_for('home'))
 
 @app.route('/vendas', methods=['GET', 'POST'])
@@ -181,11 +179,10 @@ def vendas():
             
             # Criar parcelas
             valor_restante = valor_total - valor_entrada
-            valor_parcela = valor_restante / num_parcelas
-            data_vencimento = datetime.now()
+            valor_parcela = valor_restante / num_parcelas if num_parcelas > 0 else 0
             
             for i in range(num_parcelas):
-                data_vencimento += timedelta(days=30)
+                data_vencimento = datetime.now() + timedelta(days=30 * (i + 1))
                 cur.execute("""
                     INSERT INTO pagamentos (venda_id, valor, data_vencimento, status)
                     VALUES (%s, %s, %s, 'pendente')
@@ -220,7 +217,63 @@ def vendas():
     except Exception as e:
         flash('Erro ao carregar página de vendas', 'error')
         print(f"Erro na página de vendas: {str(e)}")
-        return redirect(url_for('home'))
+        return redirect(url_for('dashboard'))
+
+#@app.route('/gerar_contrato/<int:venda_id>')
+#@login_required
+#def gerar_contrato(venda_id):
+#    conn = get_db_connection()
+#    if not conn:
+#        flash('Erro ao conectar ao banco de dados', 'error')
+#        return redirect(url_for('vendas'))
+#    
+#    try:
+#        cur = conn.cursor()
+#        # Buscar dados da venda
+#        cur.execute("""
+#            SELECT v.*, c.nome, c.cpf, c.endereco, e.nome_empresa, e.cnpj
+#            FROM vendas v
+#            JOIN clientes c ON v.cliente_id = c.id
+#            JOIN empresas e ON v.empresa_id = e.id
+#            WHERE v.id = %s AND v.empresa_id = %s
+#        """, (venda_id, current_user.empresa_id))
+#        
+#        venda_data = cur.fetchone()
+#        
+#        if not venda_data:
+#            flash('Venda não encontrada', 'error')
+#            return redirect(url_for('vendas'))
+#        
+#        # Buscar parcelas
+#        cur.execute("""
+#            SELECT valor, data_vencimento
+#            FROM pagamentos
+#            WHERE venda_id = %s
+#            ORDER BY data_vencimento
+#        """, (venda_id,))
+#        parcelas = cur.fetchall()
+#        
+#        cur.close()
+#        conn.close()
+#        
+#        # Gerar PDF
+#        html = render_template('contrato_pdf.html',
+#                             venda=venda_data,
+#                             parcelas=parcelas)
+#        
+#        pdf = HTML(string=html).write_pdf()
+#        
+#        return send_file(
+#            io.BytesIO(pdf),
+#            mimetype='application/pdf',
+#            download_name=f'contrato_venda_{venda_id}.pdf',
+#            as_attachment=True
+#        )
+#        
+#    except Exception as e:
+#        flash('Erro ao gerar contrato', 'error')
+#        print(f"Erro ao gerar contrato: {str(e)}")
+#        return redirect(url_for('vendas'))
 
 @app.route('/logout')
 @login_required
