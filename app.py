@@ -2,7 +2,7 @@ import os
 import io
 import pg8000.dbapi
 from urllib.parse import urlparse
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, send_from_directory
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -65,6 +65,11 @@ def load_user(user_id):
         if conn:
             conn.close()
         return None
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'logo.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/')
 def home():
