@@ -1,7 +1,7 @@
 import os
 import io
 import pg8000.dbapi
-import traceback
+
 from urllib.parse import urlparse
 from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, send_from_directory
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -43,7 +43,7 @@ def get_db_connection():
         )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
-        print(traceback.format_exc())
+        
         return None
 
 @login_manager.user_loader
@@ -293,9 +293,7 @@ def not_found_error(error):
 def internal_error(error):
     return render_template('500.html'), 500
 
-@app.errorhandler(Exception)
-def handle_exception(e):
-    return traceback.format_exc(), 500
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
