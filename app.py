@@ -9,88 +9,6 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# ... (outros imports permanecem iguais)
-
-@app.route('/create-test-user')
-def create_test_user():
-    """Rota para criar um usuário de teste"""
-    print("[LOG] Acessando rota de criação de usuário de teste")
-    try:
-        # Conectar ao banco de dados
-        conn = get_db_connection()
-        if not conn:
-            print("[ERRO] Falha ao conectar ao banco de dados")
-            return jsonify({
-                "success": False,
-                "message": "Falha ao conectar ao banco de dados"
-            }), 500
-        
-        # Verificar se já existe uma empresa
-        cur = conn.cursor()
-        cur.execute("SELECT id FROM empresas LIMIT 1")
-        empresa = cur.fetchone()
-        
-        if not empresa:
-            # Criar empresa de teste se não existir
-            print("[LOG] Criando empresa de teste")
-            cur.execute("INSERT INTO empresas (nome_empresa, cnpj) VALUES (%s, %s) RETURNING id", 
-                       ("Empresa de Teste", "00.000.000/0000-00"))
-            empresa_id = cur.fetchone()[0]
-        else:
-            empresa_id = empresa[0]
-        
-        # Verificar se o usuário de teste já existe
-        cur.execute("SELECT id FROM users WHERE email = %s", ("teste@example.com",))
-        user = cur.fetchone()
-        
-        if user:
-            print("[LOG] Usuário de teste já existe")
-            cur.close()
-            conn.close()
-            return jsonify({
-                "success": True,
-                "message": "Usuário de teste já existe",
-                "credentials": {
-                    "email": "teste@example.com",
-                    "password": "teste123"
-                }
-            })
-        
-        # Criar usuário de teste
-        print("[LOG] Criando usuário de teste")
-        hashed_password = generate_password_hash("teste123")
-        cur.execute("""
-            INSERT INTO users (email, password, empresa_id) 
-            VALUES (%s, %s, %s) 
-            RETURNING id
-        """, ("teste@example.com", hashed_password, empresa_id))
-        
-        user_id = cur.fetchone()[0]
-        conn.commit()
-        cur.close()
-        conn.close()
-        
-        print("[LOG] Usuário de teste criado com sucesso")
-        return jsonify({
-            "success": True,
-            "message": "Usuário de teste criado com sucesso!",
-            "credentials": {
-                "email": "teste@example.com",
-                "password": "teste123"
-            }
-        })
-        
-    except Exception as e:
-        print(f"[ERRO] Erro ao criar usuário de teste: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        
-        return jsonify({
-            "success": False,
-            "message": f"Erro ao criar usuário de teste: {str(e)}",
-            "error_type": type(e).__name__
-        }), 500
-
 # Tornar a importação do weasyprint opcional para ambientes que não o suportam
 try:
     from weasyprint import HTML
@@ -218,30 +136,110 @@ def test_db():
         }
         return jsonify(result), 500
 
+@app.route('/create-test-user')
+def create_test_user():
+    """Rota para criar um usuário de teste"""
+    print("[LOG] Acessando rota de criação de usuário de teste")
+    try:
+        # Conectar ao banco de dados
+        conn = get_db_connection()
+        if not conn:
+            print("[ERRO] Falha ao conectar ao banco de dados")
+            return jsonify({
+                "success": False,
+                "message": "Falha ao conectar ao banco de dados"
+            }), 500
+        
+        # Verificar se já existe uma empresa
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM empresas LIMIT 1")
+        empresa = cur.fetchone()
+        
+        if not empresa:
+            # Criar empresa de teste se não existir
+            print("[LOG] Criando empresa de teste")
+            cur.execute("INSERT INTO empresas (nome_empresa, cnpj) VALUES (%s, %s) RETURNING id", 
+                       ("Empresa de Teste", "00.000.000/0000-00"))
+            empresa_id = cur.fetchone()[0]
+        else:
+            empresa_id = empresa[0]
+        
+        # Verificar se o usuário de teste já existe
+        cur.execute("SELECT id FROM users WHERE email = %s", ("teste@example.com",))
+        user = cur.fetchone()
+        
+        if user:
+            print("[LOG] Usuário de teste já existe")
+            cur.close()
+            conn.close()
+            return jsonify({
+                "success": True,
+                "message": "Usuário de teste já existe",
+                "credentials": {
+                    "email": "teste@example.com",
+                    "password": "teste123"
+                }
+            })
+        
+        # Criar usuário de teste
+        print("[LOG] Criando usuário de teste")
+        hashed_password = generate_password_hash("teste123")
+        cur.execute("""
+            INSERT INTO users (email, password, empresa_id) 
+            VALUES (%s, %s, %s) 
+            RETURNING id
+        """, ("teste@example.com", hashed_password, empresa_id))
+        
+        user_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        print("[LOG] Usuário de teste criado com sucesso")
+        return jsonify({
+            "success": True,
+            "message": "Usuário de teste criado com sucesso!",
+            "credentials": {
+                "email": "teste@example.com",
+                "password": "teste123"
+            }
+        })
+        
+    except Exception as e:
+        print(f"[ERRO] Erro ao criar usuário de teste: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        return jsonify({
+            "success": False,
+            "message": f"Erro ao criar usuário de teste: {str(e)}",
+            "error_type": type(e).__name__
+        }), 500
+
 @login_manager.user_loader
 def load_user(user_id):
-    print(f"Carregando usuário com ID: {user_id}")
+    print(f"[LOG] Carregando usuário com ID: {user_id}")
     conn = get_db_connection()
     if not conn:
-        print("Falha ao conectar ao banco de dados em load_user")
+        print("[ERRO] Falha ao conectar ao banco de dados em load_user")
         return None
     
     try:
         cur = conn.cursor()
-        print("Executando consulta de usuário em load_user")
+        print("[LOG] Executando consulta de usuário em load_user")
         cur.execute("SELECT id, email, password, empresa_id FROM users WHERE id = %s", (user_id,))
         user_data = cur.fetchone()
-        print(f"Dados do usuário carregados: {user_data}")
+        print(f"[LOG] Dados do usuário carregados: {user_data}")
         cur.close()
         conn.close()
         
         if user_data:
-            print("Usuário encontrado, criando objeto User")
+            print("[LOG] Usuário encontrado, criando objeto User")
             return User(user_data[0], user_data[1], user_data[2], user_data[3])
-        print("Usuário não encontrado")
+        print("[LOG] Usuário não encontrado")
         return None
     except Exception as e:
-        print(f"Erro ao carregar usuário: {str(e)}")
+        print(f"[ERRO] Erro ao carregar usuário: {str(e)}")
         import traceback
         traceback.print_exc()
         if conn:
@@ -255,11 +253,11 @@ def favicon():
 
 @app.route('/')
 def home():
-    print("Acessando rota home")
+    print("[LOG] Acessando rota home")
     if current_user.is_authenticated:
-        print("Usuário autenticado, redirecionando para dashboard")
+        print("[LOG] Usuário autenticado, redirecionando para dashboard")
         return redirect(url_for('dashboard'))
-    print("Usuário não autenticado, mostrando página inicial")
+    print("[LOG] Usuário não autenticado, mostrando página inicial")
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -305,16 +303,16 @@ def login():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    print("Acessando rota dashboard")
+    print("[LOG] Acessando rota dashboard")
     conn = get_db_connection()
     if not conn:
-        print("Falha ao conectar ao banco de dados no dashboard")
+        print("[ERRO] Falha ao conectar ao banco de dados no dashboard")
         flash('Erro ao conectar ao banco de dados', 'error')
         return redirect(url_for('home'))
     
     try:
         cur = conn.cursor()
-        print("Executando consulta de vendas recentes")
+        print("[LOG] Executando consulta de vendas recentes")
         # Buscar vendas recentes
         cur.execute("""
             SELECT v.id, c.nome, v.valor_total, v.data_venda, v.status 
@@ -325,9 +323,9 @@ def dashboard():
             LIMIT 10
         """, (current_user.empresa_id,))
         vendas_recentes = cur.fetchall()
-        print(f"Vendas recentes encontradas: {len(vendas_recentes)}")
+        print(f"[LOG] Vendas recentes encontradas: {len(vendas_recentes)}")
         
-        print("Executando consulta de pagamentos pendentes")
+        print("[LOG] Executando consulta de pagamentos pendentes")
         # Buscar pagamentos pendentes
         cur.execute("""
             SELECT c.nome, p.valor, p.data_vencimento 
@@ -338,21 +336,21 @@ def dashboard():
             ORDER BY p.data_vencimento
         """, (current_user.empresa_id,))
         pagamentos_pendentes = cur.fetchall()
-        print(f"Pagamentos pendentes encontrados: {len(pagamentos_pendentes)}")
+        print(f"[LOG] Pagamentos pendentes encontrados: {len(pagamentos_pendentes)}")
         
         cur.close()
         conn.close()
         
-        print("Renderizando template do dashboard")
+        print("[LOG] Renderizando template do dashboard")
         return render_template('dashboard.html', 
                              vendas_recentes=vendas_recentes,
                              pagamentos_pendentes=pagamentos_pendentes)
     except Exception as e:
-        print(f"Erro no dashboard: {str(e)}")
+        print(f"[ERRO] Erro no dashboard: {str(e)}")
         import traceback
         traceback.print_exc()
         flash('Erro ao carregar dashboard', 'error')
-        print("Redirecionando para home devido ao erro")
+        print("[LOG] Redirecionando para home devido ao erro")
         return redirect(url_for('home'))
 
 @app.route('/vendas', methods=['GET', 'POST'])
@@ -403,7 +401,9 @@ def vendas():
             
         except Exception as e:
             flash('Erro ao registrar venda', 'error')
-            print(f"Erro ao registrar venda: {str(e)}")
+            print(f"[ERRO] Erro ao registrar venda: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return redirect(url_for('vendas'))
     
     # GET request
@@ -422,7 +422,9 @@ def vendas():
         return render_template('vendas.html', clientes=clientes)
     except Exception as e:
         flash('Erro ao carregar página de vendas', 'error')
-        print(f"Erro na página de vendas: {str(e)}")
+        print(f"[ERRO] Erro na página de vendas: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return redirect(url_for('dashboard'))
 
 @app.route('/gerar_contrato/<int:venda_id>')
@@ -527,7 +529,9 @@ def gerar_contrato(venda_id):
         
     except Exception as e:
         flash('Erro ao gerar contrato', 'error')
-        print(f"Erro ao gerar contrato: {str(e)}")
+        print(f"[ERRO] Erro ao gerar contrato: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return redirect(url_for('vendas'))
 
 @app.route('/logout')
@@ -543,8 +547,6 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('500.html'), 500
-
-
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
