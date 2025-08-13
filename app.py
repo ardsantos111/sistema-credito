@@ -254,11 +254,19 @@ def favicon():
 @app.route('/')
 def home():
     print("[LOG] Acessando rota home")
-    if current_user.is_authenticated:
-        print("[LOG] Usuário autenticado, redirecionando para dashboard")
-        return redirect(url_for('dashboard'))
-    print("[LOG] Usuário não autenticado, mostrando página inicial")
-    return render_template('index.html')
+    # Verificar se a aplicação está funcionando
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            "endpoint": rule.endpoint,
+            "methods": list(rule.methods),
+            "rule": str(rule)
+        })
+    
+    return jsonify({
+        "message": "Aplicação está funcionando!",
+        "routes": routes
+    })
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
