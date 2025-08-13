@@ -53,13 +53,14 @@ def get_db_connection():
         print(f"[LOG] Banco de dados: {url.path[1:]}")
         print(f"[LOG] Senha decodificada: {'*' * len(decoded_password) if decoded_password else 'None'}")
         
-        # Conectar ao banco de dados
+        # Conectar ao banco de dados com timeout
         conn = pg8000.dbapi.connect(
             user=url.username,
             password=decoded_password,
             host=url.hostname,
             port=url.port,
-            database=url.path[1:]
+            database=url.path[1:],
+            timeout=30  # Adicionar timeout de 30 segundos
         )
         
         print("[LOG] Conexão com o banco de dados estabelecida com sucesso!")
@@ -86,14 +87,15 @@ def test_db():
         # Decodificar a senha para lidar com caracteres especiais
         decoded_password = unquote(url.password) if url.password else None
         
-        # Conectar ao banco de dados
-        print("[LOG] Tentando conectar ao banco de dados...")
+        # Conectar ao banco de dados com timeout
+        print("[LOG] Tentando conectar ao banco de dados com timeout...")
         conn = pg8000.dbapi.connect(
             user=url.username,
             password=decoded_password,
             host=url.hostname,
             port=url.port,
-            database=url.path[1:]
+            database=url.path[1:],
+            timeout=30  # Adicionar timeout de 30 segundos
         )
         
         # Testar uma consulta simples
