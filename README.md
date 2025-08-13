@@ -6,8 +6,14 @@ Esta é uma aplicação Flask para gerenciar vendas e pagamentos.
 
 1. **Instale as dependências:**
 
+   ### Para implantação na Vercel (ambiente de produção):
    ```bash
    pip install -r requirements.txt
+   ```
+
+   ### Para uso local (ambiente de desenvolvimento):
+   ```bash
+   pip install -r requirements-local.txt
    ```
 
 2. **Configure o banco de dados:**
@@ -49,9 +55,21 @@ Esta é uma aplicação Flask para gerenciar vendas e pagamentos.
 
 4. **Execute a aplicação:**
 
+   ### Para implantação na Vercel (ambiente de produção):
    ```bash
    flask run
    ```
+
+   ### Para uso local (ambiente de desenvolvimento):
+   ```bash
+   python run.py
+   ```
+
+## Funcionalidades
+
+- **Geração de contratos em PDF**: Disponível apenas no ambiente local devido a limitações do ambiente da Vercel.
+- **Gestão de vendas e pagamentos**: Cadastro de clientes, registro de vendas e acompanhamento de pagamentos.
+- **Dashboard**: Visão geral das vendas recentes e pagamentos pendentes.
 
 ## Implantação na Vercel
 

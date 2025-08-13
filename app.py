@@ -7,7 +7,13 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
-from weasyprint import HTML
+# Tornar a importação do weasyprint opcional para ambientes que não o suportam
+try:
+    from weasyprint import HTML
+    WEASYPRINT_AVAILABLE = True
+except ImportError:
+    WEASYPRINT_AVAILABLE = False
+    print("WeasyPrint não está disponível. A geração de PDFs será desativada.")
 
 
 app = Flask(__name__)
@@ -221,6 +227,11 @@ def vendas():
 @app.route('/gerar_contrato/<int:venda_id>')
 @login_required
 def gerar_contrato(venda_id):
+    # Verificar se WeasyPrint está disponível
+    if not WEASYPRINT_AVAILABLE:
+        flash('A geração de PDFs não está disponível neste ambiente.', 'error')
+        return redirect(url_for('vendas'))
+    
     conn = get_db_connection()
     if not conn:
         flash('Erro ao conectar ao banco de dados', 'error')
