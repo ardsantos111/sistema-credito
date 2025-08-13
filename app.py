@@ -21,8 +21,12 @@ app = Flask(__name__)
 
 # Configurações
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'chave_secreta_temporaria')
-# Usar a URL do banco de dados original com parâmetros adicionais
-app.config['DATABASE_URL'] = "postgresql://postgres:Am461271%40am461271@db.guqrxjjrpmfbeftwmokz.supabase.co:5432/postgres?sslmode=require"
+# Configurar parâmetros do banco de dados separadamente
+app.config['DB_HOST'] = "db.guqrxjjrpmfbeftwmokz.supabase.co"
+app.config['DB_PORT'] = 5432
+app.config['DB_NAME'] = "postgres"
+app.config['DB_USER'] = "postgres"
+app.config['DB_PASSWORD'] = "Am461271@am461271"  # Senha decodificada diretamente
 
 # Configuração do Flask-Login
 login_manager = LoginManager()
@@ -38,29 +42,29 @@ class User(UserMixin):
 
 def get_db_connection():
     try:
-        # Usar a URL do banco de dados correta diretamente
-        database_url = app.config['DATABASE_URL']
-        print(f"[LOG] Tentando conectar ao banco de dados: {database_url[:20]}...")
+        # Usar parâmetros separados para conexão
+        host = app.config['DB_HOST']
+        port = app.config['DB_PORT']
+        database = app.config['DB_NAME']
+        user = app.config['DB_USER']
+        password = app.config['DB_PASSWORD']
         
-        # Analisar a URL do banco de dados
-        url = urlparse(database_url)
+        print(f"[LOG] Tentando conectar ao banco de dados:")
+        print(f"[LOG] Host: {host}")
+        print(f"[LOG] Port: {port}")
+        print(f"[LOG] Database: {database}")
+        print(f"[LOG] User: {user}")
+        print(f"[LOG] Password: {'*' * len(password)}")
         
-        # Decodificar a senha para lidar com caracteres especiais
-        decoded_password = unquote(url.password) if url.password else None
-        print(f"[LOG] Usuário: {url.username}")
-        print(f"[LOG] Host: {url.hostname}")
-        print(f"[LOG] Porta: {url.port}")
-        print(f"[LOG] Banco de dados: {url.path[1:]}")
-        print(f"[LOG] Senha decodificada: {'*' * len(decoded_password) if decoded_password else 'None'}")
-        
-        # Conectar ao banco de dados com timeout
+        # Conectar ao banco de dados com timeout e SSL
         conn = pg8000.dbapi.connect(
-            user=url.username,
-            password=decoded_password,
-            host=url.hostname,
-            port=url.port,
-            database=url.path[1:],
-            timeout=30  # Adicionar timeout de 30 segundos
+            user=user,
+            password=password,
+            host=host,
+            port=port,
+            database=database,
+            timeout=30,
+            ssl_context=True  # Forçar SSL
         )
         
         print("[LOG] Conexão com o banco de dados estabelecida com sucesso!")
@@ -77,25 +81,30 @@ def test_db():
     """Rota para testar a conexão com o banco de dados"""
     print("[LOG] Acessando rota de teste do banco de dados")
     try:
-        # Usar a URL do banco de dados correta diretamente
-        database_url = app.config['DATABASE_URL']
-        print(f"[LOG] URL do banco de dados: {database_url[:20]}...")
+        # Usar parâmetros separados para conexão
+        host = app.config['DB_HOST']
+        port = app.config['DB_PORT']
+        database = app.config['DB_NAME']
+        user = app.config['DB_USER']
+        password = app.config['DB_PASSWORD']
         
-        # Analisar a URL do banco de dados
-        url = urlparse(database_url)
+        print(f"[LOG] Tentando conectar ao banco de dados:")
+        print(f"[LOG] Host: {host}")
+        print(f"[LOG] Port: {port}")
+        print(f"[LOG] Database: {database}")
+        print(f"[LOG] User: {user}")
+        print(f"[LOG] Password: {'*' * len(password)}")
         
-        # Decodificar a senha para lidar com caracteres especiais
-        decoded_password = unquote(url.password) if url.password else None
-        
-        # Conectar ao banco de dados com timeout
-        print("[LOG] Tentando conectar ao banco de dados com timeout...")
+        # Conectar ao banco de dados com timeout e SSL
+        print("[LOG] Tentando conectar ao banco de dados...")
         conn = pg8000.dbapi.connect(
-            user=url.username,
-            password=decoded_password,
-            host=url.hostname,
-            port=url.port,
-            database=url.path[1:],
-            timeout=30  # Adicionar timeout de 30 segundos
+            user=user,
+            password=password,
+            host=host,
+            port=port,
+            database=database,
+            timeout=30,
+            ssl_context=True  # Forçar SSL
         )
         
         # Testar uma consulta simples
