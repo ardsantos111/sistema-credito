@@ -71,6 +71,12 @@ Esta é uma aplicação Flask para gerenciar vendas e pagamentos.
 - **Gestão de vendas e pagamentos**: Cadastro de clientes, registro de vendas e acompanhamento de pagamentos.
 - **Dashboard**: Visão geral das vendas recentes e pagamentos pendentes.
 
+## Roadmap de Melhorias
+
+Para ver o roadmap completo de melhorias planejadas, consulte o arquivo [ROADMAP.md](ROADMAP.md).
+
+Atualmente estamos trabalhando na **Categoria 1: Interface do Usuário**.
+
 ## Implantação na Vercel
 
 Ao implantar na Vercel, certifique-se de definir as variáveis de ambiente `SECRET_KEY` e `DATABASE_URL` nas configurações do projeto Vercel.
