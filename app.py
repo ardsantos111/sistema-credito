@@ -21,8 +21,8 @@ app = Flask(__name__)
 
 # Configurações
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'chave_secreta_temporaria')
-# Usar a URL do banco de dados com connection pooling
-app.config['DATABASE_URL'] = "postgresql://postgres:Am461271%40am461271@aws-0-sa-east-1.pooler.supabase.com:5432/postgres"
+# Usar a URL do banco de dados com connection pooling correta
+app.config['DATABASE_URL'] = "postgresql://postgres:Am461271%40am461271@guqrxjjrpmfbeftwmokz.sa-east-1.pooler.supabase.com:5432/postgres"
 
 # Configuração do Flask-Login
 login_manager = LoginManager()
