@@ -1,351 +1,204 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Venda - Sistema de Crédito</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #007bff;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --warning-color: #ffc107;
-            --info-color: #17a2b8;
-            --light-color: #f8f9fa;
-            --dark-color: #343a40;
-            --white: #ffffff;
-            --gray-100: #f8f9fa;
-            --gray-200: #e9ecef;
-            --gray-300: #dee2e6;
-            --gray-400: #ced4da;
-            --gray-500: #adb5bd;
-            --gray-600: #6c757d;
-            --gray-700: #495057;
-            --gray-800: #343a40;
-            --gray-900: #212529;
-            --border-radius: 0.375rem;
-            --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            --box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-        }
+{% extends "base.html" %}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% block title %}Registrar Venda - OC CDC{% endblock %}
+{% block page_title %}Registrar Nova Venda{% endblock %}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fb;
-            color: var(--gray-800);
-            line-height: 1.6;
-        }
-
-        .container {
-            width: 95%;
-            max-width: 800px;
-            margin: 25px auto;
-            background-color: var(--white);
-            padding: 30px;
-            box-shadow: var(--box-shadow);
-            border-radius: var(--border-radius);
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--gray-300);
-        }
-
-        h1 {
-            color: var(--dark-color);
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--gray-700);
-        }
-
-        select, input[type="text"], input[type="number"], input[type="email"] {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--gray-300);
-            border-radius: var(--border-radius);
-            box-sizing: border-box;
-            font-size: 1rem;
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-
-        select:focus, input[type="text"]:focus, input[type="number"]:focus, input[type="email"]:focus {
-            border-color: var(--primary-color);
-            outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-
-        .input-group {
-            position: relative;
-        }
-
-        .input-group-prepend {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            padding: 0 12px;
-            background-color: var(--gray-200);
-            border: 1px solid var(--gray-300);
-            border-right: none;
-            border-radius: var(--border-radius) 0 0 var(--border-radius);
-            color: var(--gray-600);
-        }
-
-        .input-group input {
-            padding-left: 45px;
-        }
-
-        button[type="submit"] {
-            background-color: var(--primary-color);
-            color: var(--white);
-            border: none;
-            padding: 14px 25px;
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            border-radius: var(--border-radius);
-            transition: background-color 0.2s ease;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #0069d9;
-        }
-
-        .btn {
-            display: inline-block;
-            font-weight: 500;
-            text-align: center;
-            white-space: nowrap;
-            vertical-align: middle;
-            user-select: none;
-            border: 1px solid transparent;
-            padding: 0.5rem 1.2rem;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            border-radius: var(--border-radius);
-            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .btn-secondary {
-            color: var(--white);
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-
-        .btn-secondary:hover {
-            background-color: #5a6268;
-            border-color: #545b62;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .form-col {
-            flex: 1;
-        }
-
-        .alert {
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            border: 1px solid transparent;
-            border-radius: var(--border-radius);
-        }
-
-        .alert-success {
-            color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-        }
-
-        .alert-error {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
-
-        .card {
-            background-color: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            margin-bottom: 25px;
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 15px 20px;
-            background-color: var(--gray-100);
-            border-bottom: 1px solid var(--gray-300);
-        }
-
-        .card-header h2 {
-            margin: 0;
-            font-size: 1.3rem;
-            color: var(--dark-color);
-            font-weight: 500;
-        }
-
-        .card-body {
-            padding: 25px;
-        }
-
-        .form-section {
-            margin-bottom: 35px;
-        }
-
-        .form-section h3 {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--gray-300);
-            color: var(--dark-color);
-            font-weight: 500;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                width: 98%;
-                padding: 20px;
-            }
-            
-            header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .form-row {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            select, input[type="text"], input[type="number"], input[type="email"] {
-                padding: 10px 12px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-cart-plus"></i> Registrar Nova Venda</h1>
-            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
-            </a>
-        </header>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        
-        <div class="card">
-            <div class="card-header">
-                <h2><i class="fas fa-file-invoice-dollar"></i> Informações da Venda</h2>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('vendas') }}">
-                    <div class="form-section">
-                        <h3><i class="fas fa-user"></i> Cliente</h3>
-                        <div class="form-group">
-                            <label for="cliente_id">Selecione o Cliente:</label>
-                            <select id="cliente_id" name="cliente_id" required>
-                                <option value="">Selecione um cliente</option>
-                                {% for cliente in clientes %}
-                                <option value="{{ cliente[0] }}">{{ cliente[1] }}</option>
-                                {% endfor %}
-                            </select>
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-invoice-dollar"></i> Informações da Venda
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('vendas') }}" id="vendaForm">
+                        <div class="form-section mb-5">
+                            <h5 class="border-bottom pb-2 mb-4">
+                                <i class="fas fa-user"></i> Cliente
+                            </h5>
+                            <div class="form-group">
+                                <label for="cliente_id">Selecione o Cliente:</label>
+                                <select id="cliente_id" name="cliente_id" class="form-control" required>
+                                    <option value="">Selecione um cliente</option>
+                                    {% for cliente in clientes %}
+                                    <option value="{{ cliente[0] }}">{{ cliente[1] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h3><i class="fas fa-money-bill-wave"></i> Valores</h3>
-                        <div class="form-row">
-                            <div class="form-group form-col">
-                                <label for="valor_total">Valor Total (R$):</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">R$</div>
-                                    <input type="number" id="valor_total" name="valor_total" step="0.01" min="0" required>
+                        
+                        <div class="form-section mb-5">
+                            <h5 class="border-bottom pb-2 mb-4">
+                                <i class="fas fa-money-bill-wave"></i> Valores
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="valor_total">Valor Total (R$):</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">R$</span>
+                                            </div>
+                                            <input type="number" id="valor_total" name="valor_total" class="form-control" step="0.01" min="0" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="valor_entrada">Valor de Entrada (R$):</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">R$</span>
+                                            </div>
+                                            <input type="number" id="valor_entrada" name="valor_entrada" class="form-control" step="0.01" min="0" value="0">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="form-group form-col">
-                                <label for="valor_entrada">Valor de Entrada (R$):</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">R$</div>
-                                    <input type="number" id="valor_entrada" name="valor_entrada" step="0.01" min="0" value="0">
+                            <div class="form-group">
+                                <label for="num_parcelas">Número de Parcelas:</label>
+                                <input type="number" id="num_parcelas" name="num_parcelas" class="form-control" min="1" value="1" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section mb-4">
+                            <h5 class="border-bottom pb-2 mb-4">
+                                <i class="fas fa-calculator"></i> Resumo
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">Valor Total</h6>
+                                            <h4 class="text-primary" id="resumo_total">R$ 0,00</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">Valor de Entrada</h6>
+                                            <h4 class="text-success" id="resumo_entrada">R$ 0,00</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">Valor Financiado</h6>
+                                            <h4 class="text-warning" id="resumo_financiado">R$ 0,00</h4>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="num_parcelas">Número de Parcelas:</label>
-                            <input type="number" id="num_parcelas" name="num_parcelas" min="1" value="1" required>
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Registrar Venda
+                            </button>
                         </div>
-                    </div>
-                    
-                    <button type="submit">
-                        <i class="fas fa-save"></i> Registrar Venda
-                    </button>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+</div>
+
+<style>
+    .form-section {
+        background-color: var(--white);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        box-shadow: var(--box-shadow);
+    }
     
-    <script>
-        // Adicionar validação em tempo real
-        document.addEventListener('DOMContentLoaded', function() {
-            const valorTotal = document.getElementById('valor_total');
-            const valorEntrada = document.getElementById('valor_entrada');
-            const numParcelas = document.getElementById('num_parcelas');
+    .card {
+        border-radius: 0.5rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        border: 0;
+    }
+    
+    .card-header {
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .input-group-text {
+        background-color: var(--gray-200);
+        border-color: var(--gray-300);
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 0.375rem;
+    }
+</style>
+
+<script>
+    // Adicionar validação em tempo real e cálculo do resumo
+    document.addEventListener('DOMContentLoaded', function() {
+        const valorTotal = document.getElementById('valor_total');
+        const valorEntrada = document.getElementById('valor_entrada');
+        const numParcelas = document.getElementById('num_parcelas');
+        const resumoTotal = document.getElementById('resumo_total');
+        const resumoEntrada = document.getElementById('resumo_entrada');
+        const resumoFinanciado = document.getElementById('resumo_financiado');
+        
+        function formatarMoeda(valor) {
+            return valor.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+        
+        function atualizarResumo() {
+            const total = parseFloat(valorTotal.value) || 0;
+            const entrada = parseFloat(valorEntrada.value) || 0;
+            const financiado = total - entrada;
             
-            function validarValores() {
-                const total = parseFloat(valorTotal.value) || 0;
-                const entrada = parseFloat(valorEntrada.value) || 0;
-                
-                if (entrada > total) {
-                    valorEntrada.setCustomValidity('O valor de entrada não pode ser maior que o valor total.');
-                } else {
-                    valorEntrada.setCustomValidity('');
-                }
+            resumoTotal.textContent = 'R$ ' + formatarMoeda(total);
+            resumoEntrada.textContent = 'R$ ' + formatarMoeda(entrada);
+            resumoFinanciado.textContent = 'R$ ' + formatarMoeda(financiado);
+            
+            if (entrada > total) {
+                valorEntrada.setCustomValidity('O valor de entrada não pode ser maior que o valor total.');
+                valorEntrada.classList.add('is-invalid');
+            } else {
+                valorEntrada.setCustomValidity('');
+                valorEntrada.classList.remove('is-invalid');
             }
+        }
+        
+        valorTotal.addEventListener('input', atualizarResumo);
+        valorEntrada.addEventListener('input', atualizarResumo);
+        numParcelas.addEventListener('input', atualizarResumo);
+        
+        // Validar formulário antes de enviar
+        document.getElementById('vendaForm').addEventListener('submit', function(e) {
+            const total = parseFloat(valorTotal.value) || 0;
+            const entrada = parseFloat(valorEntrada.value) || 0;
             
-            valorTotal.addEventListener('input', validarValores);
-            valorEntrada.addEventListener('input', validarValores);
+            if (entrada > total) {
+                e.preventDefault();
+                alert('O valor de entrada não pode ser maior que o valor total.');
+                return false;
+            }
         });
-    </script>
-</body>
-</html>
+    });
+</script>
+{% endblock %}

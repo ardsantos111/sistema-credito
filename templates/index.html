@@ -1,80 +1,138 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Sistema de Crédito</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+{% extends "base.html" %}
 
-        .container {
-            width: 80%;
-            max-width: 800px;
-            background-color: #fff;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            text-align: center;
-        }
+{% block title %}Início - OC CDC{% endblock %}
+{% block page_title %}Bem-vindo ao OC CDC{% endblock %}
 
-        h1 {
-            color: #333;
-        }
-
-        .action-button {
-            display: inline-block;
-            margin: 10px;
-            padding: 15px 30px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            background-color: #007bff;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: background-color 0.3s;
-            min-width: 200px;
-        }
-
-        .action-button:hover {
-            background-color: #0056b3;
-        }
-
-        .action-button i {
-            margin-right: 8px;
-        }
-
-        .action-button.secondary {
-            background-color: #28a745;
-        }
-
-        .action-button.secondary:hover {
-            background-color: #1e7e34;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Bem-vindo ao Sistema de Crédito</h1>
-        <p>Selecione uma das opções abaixo para começar.</p>
-        <div>
-            <a href="{{ url_for('login') }}" class="action-button">
-                <i class="fas fa-sign-in-alt"></i> Login
-            </a>
-            <a href="{{ url_for('dashboard') }}" class="action-button secondary">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-            </a>
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-home"></i> Página Inicial
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-5">
+                        <div class="mb-4">
+                            <i class="fas fa-credit-card fa-4x text-primary"></i>
+                        </div>
+                        <h2>Bem-vindo ao Sistema de Crédito</h2>
+                        <p class="lead">Gerencie vendas, pagamentos e clientes de forma eficiente</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card border-left-primary h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Vendas
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">Gerenciar</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card border-left-success h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Clientes
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">Cadastrar</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card border-left-info h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Relatórios
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">Analisar</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-chart-bar fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card border-left-warning h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Configurações
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">Personalizar</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-cog fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-5">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-tachometer-alt"></i> Acessar Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+
+<style>
+    .card {
+        border-radius: 0.5rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        border: 0;
+    }
+    
+    .card-header {
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .border-left-primary {
+        border-left: 0.25rem solid var(--primary-color) !important;
+    }
+    
+    .border-left-success {
+        border-left: 0.25rem solid var(--success-color) !important;
+    }
+    
+    .border-left-info {
+        border-left: 0.25rem solid var(--info-color) !important;
+    }
+    
+    .border-left-warning {
+        border-left: 0.25rem solid var(--warning-color) !important;
+    }
+</style>
+{% endblock %}
