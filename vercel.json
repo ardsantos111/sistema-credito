@@ -5,7 +5,8 @@
       "src": "app.py",
       "use": "@vercel/python",
       "config": {
-        "buildCommand": "pip install -r requirements.txt"
+        "buildCommand": "pip install -r requirements.txt",
+        "runtime": "python3.9"
       }
     }
   ],
@@ -14,5 +15,9 @@
       "src": "/(.*)",
       "dest": "app.py"
     }
-  ]
+  ],
+  "env": {
+    "SECRET_KEY": "@secret-key",
+    "DATABASE_URL": "@database-url"
+  }
 }
