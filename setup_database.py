@@ -6,13 +6,20 @@ load_dotenv()
 
 def get_db_connection():
     try:
-        # Conectar diretamente com os parâmetros separados para evitar problemas de codificação
+        # Obter a URL do banco de dados das variáveis de ambiente
+        database_url = os.environ.get('DATABASE_URL')
+        
+        # Analisar a URL do banco de dados
+        from urllib.parse import urlparse
+        url = urlparse(database_url)
+        
+        # Conectar ao banco de dados
         return pg8000.dbapi.connect(
-            user="postgres",
-            password="Am461271@am461271",
-            host="db.guqrxjjrpmfbeftwmokz.supabase.co",
-            port=5432,
-            database="postgres"
+            user=url.username,
+            password=url.password,
+            host=url.hostname,
+            port=url.port,
+            database=url.path[1:]
         )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
