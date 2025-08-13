@@ -21,11 +21,11 @@ app = Flask(__name__)
 
 # Configurações
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'chave_secreta_temporaria')
-# Configurar parâmetros do banco de dados separadamente (URL direta)
-app.config['DB_HOST'] = "aws-0-sa-east-1.pooler.supabase.com"
-app.config['DB_PORT'] = 6543  # Porta padrão do connection pooling
+# Configurar parâmetros do banco de dados separadamente (conexão direta)
+app.config['DB_HOST'] = "db.guqrxjjrpmfbeftwmokz.supabase.co"
+app.config['DB_PORT'] = 5432
 app.config['DB_NAME'] = "postgres"
-app.config['DB_USER'] = "postgres.guqrxjjrpmfbeftwmokz"
+app.config['DB_USER'] = "postgres"
 app.config['DB_PASSWORD'] = "Am461271@am461271"  # Senha decodificada diretamente
 
 # Configuração do Flask-Login
