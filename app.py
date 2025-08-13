@@ -37,8 +37,9 @@ class User(UserMixin):
 
 def get_db_connection():
     try:
-        # Obter a URL do banco de dados da configuração
-        database_url = app.config['DATABASE_URL']
+        # Usar a URL do banco de dados correta diretamente
+        database_url = "postgresql://postgres:Am461271%40am461271@db.guqrxjjrpmfbeftwmokz.supabase.co:5432/postgres"
+        print(f"Tentando conectar ao banco de dados: {database_url}")
         
         # Analisar a URL do banco de dados
         from urllib.parse import urlparse, unquote
@@ -46,37 +47,56 @@ def get_db_connection():
         
         # Decodificar a senha para lidar com caracteres especiais
         decoded_password = unquote(url.password) if url.password else None
+        print(f"Usuário: {url.username}")
+        print(f"Host: {url.hostname}")
+        print(f"Porta: {url.port}")
+        print(f"Banco de dados: {url.path[1:]}")
+        print(f"Senha decodificada: {'*' * len(decoded_password) if decoded_password else 'None'}")
         
         # Conectar ao banco de dados
-        return pg8000.dbapi.connect(
+        conn = pg8000.dbapi.connect(
             user=url.username,
             password=decoded_password,
             host=url.hostname,
             port=url.port,
             database=url.path[1:]
         )
+        
+        print("Conexão com o banco de dados estabelecida com sucesso!")
+        return conn
+        
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return None
 
 @login_manager.user_loader
 def load_user(user_id):
+    print(f"Carregando usuário com ID: {user_id}")
     conn = get_db_connection()
     if not conn:
+        print("Falha ao conectar ao banco de dados em load_user")
         return None
     
     try:
         cur = conn.cursor()
+        print("Executando consulta de usuário em load_user")
         cur.execute("SELECT id, email, password, empresa_id FROM users WHERE id = %s", (user_id,))
         user_data = cur.fetchone()
+        print(f"Dados do usuário carregados: {user_data}")
         cur.close()
         conn.close()
         
         if user_data:
+            print("Usuário encontrado, criando objeto User")
             return User(user_data[0], user_data[1], user_data[2], user_data[3])
+        print("Usuário não encontrado")
         return None
     except Exception as e:
         print(f"Erro ao carregar usuário: {str(e)}")
+        import traceback
+        traceback.print_exc()
         if conn:
             conn.close()
         return None
@@ -88,8 +108,11 @@ def favicon():
 
 @app.route('/')
 def home():
+    print("Acessando rota home")
     if current_user.is_authenticated:
+        print("Usuário autenticado, redirecionando para dashboard")
         return redirect(url_for('dashboard'))
+    print("Usuário não autenticado, mostrando página inicial")
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -97,41 +120,52 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        print(f"Tentando login com email: {email}")
         
         conn = get_db_connection()
         if not conn:
+            print("Falha ao conectar ao banco de dados")
             flash('Erro ao conectar ao banco de dados', 'error')
             return redirect(url_for('login'))
         
         try:
             cur = conn.cursor()
+            print("Executando consulta de usuário")
             cur.execute("SELECT id, email, password, empresa_id FROM users WHERE email = %s", (email,))
             user_data = cur.fetchone()
+            print(f"Dados do usuário encontrados: {user_data is not None}")
             cur.close()
             conn.close()
             
             if user_data and check_password_hash(user_data[2], password):
                 user = User(user_data[0], user_data[1], user_data[2], user_data[3])
                 login_user(user)
+                print("Login bem-sucedido")
                 return redirect(url_for('dashboard'))
             
+            print("Email ou senha incorretos")
             flash('Email ou senha incorretos', 'error')
         except Exception as e:
-            flash('Erro ao realizar login', 'error')
             print(f"Erro no login: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            flash('Erro ao realizar login', 'error')
         
     return render_template('login.html')
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    print("Acessando rota dashboard")
     conn = get_db_connection()
     if not conn:
+        print("Falha ao conectar ao banco de dados no dashboard")
         flash('Erro ao conectar ao banco de dados', 'error')
         return redirect(url_for('home'))
     
     try:
         cur = conn.cursor()
+        print("Executando consulta de vendas recentes")
         # Buscar vendas recentes
         cur.execute("""
             SELECT v.id, c.nome, v.valor_total, v.data_venda, v.status 
@@ -142,7 +176,9 @@ def dashboard():
             LIMIT 10
         """, (current_user.empresa_id,))
         vendas_recentes = cur.fetchall()
+        print(f"Vendas recentes encontradas: {len(vendas_recentes)}")
         
+        print("Executando consulta de pagamentos pendentes")
         # Buscar pagamentos pendentes
         cur.execute("""
             SELECT c.nome, p.valor, p.data_vencimento 
@@ -153,16 +189,21 @@ def dashboard():
             ORDER BY p.data_vencimento
         """, (current_user.empresa_id,))
         pagamentos_pendentes = cur.fetchall()
+        print(f"Pagamentos pendentes encontrados: {len(pagamentos_pendentes)}")
         
         cur.close()
         conn.close()
         
+        print("Renderizando template do dashboard")
         return render_template('dashboard.html', 
                              vendas_recentes=vendas_recentes,
                              pagamentos_pendentes=pagamentos_pendentes)
     except Exception as e:
-        flash('Erro ao carregar dashboard', 'error')
         print(f"Erro no dashboard: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        flash('Erro ao carregar dashboard', 'error')
+        print("Redirecionando para home devido ao erro")
         return redirect(url_for('home'))
 
 @app.route('/vendas', methods=['GET', 'POST'])
