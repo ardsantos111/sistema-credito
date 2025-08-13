@@ -2,3 +2,4 @@
 .vscode/
 test_db_connection.py
 test_db_vercel.py
+vercel_test.py
