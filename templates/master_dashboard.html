@@ -3,166 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Master</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Master Dashboard - Sistema Multiempresa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        .summary-cards {
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fb;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #004085 0%, #002752 100%);
+            color: white;
+            padding: 1rem 2rem;
             display: flex;
-            justify-content: space-around;
-            gap: 1em;
-            margin-bottom: 2em;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
-        .card {
-            background-color: #f4f4f4;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 1.5em;
+        
+        .welcome {
+            flex-grow: 1;
             text-align: center;
-            flex: 1;
         }
-        .card h3 {
-            margin-top: 0;
+        
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #004085;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .management-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .management-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .management-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .management-card:hover {
+            border-color: #004085;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .management-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #004085;
+        }
+        
+        .management-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
             color: #333;
         }
-        .card p {
-            font-size: 1.8em;
-            font-weight: bold;
-            margin-bottom: 0;
+        
+        .management-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
         }
-        .table-container {
-            margin-top: 2em;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1em;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .filtro-container {
-            margin-bottom: 2em;
-            text-align: right;
-        }
-        .filtro-container select {
-            padding: 8px;
+        
+        .btn-primary {
+            background: #004085;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
             border-radius: 5px;
-            border: 1px solid #ccc;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: #002752;
         }
     </style>
 </head>
 <body>
+    <nav class="navbar">
+        <div class="welcome">
+            <h1><i class="fas fa-globe-americas"></i> Master Dashboard</h1>
+            <p>Gestão Global do Sistema Multiempresa</p>
+        </div>
+        <a href="/logout" class="btn-logout">
+            <i class="fas fa-sign-out-alt"></i> Sair
+        </a>
+    </nav>
+    
     <div class="container">
-        <header>
-            <h1>Dashboard Master</h1>
-            <nav>
-                <a href="{{ url_for('vendas') }}">Nova Venda</a>
-                <a href="{{ url_for('gerenciar_pagamentos') }}">Gerenciar Pagamentos</a>
-                <a href="{{ url_for('configuracoes') }}">Configurações</a>
-                <a href="{{ url_for('logout') }}">Sair</a>
-            </nav>
-        </header>
+        <h1 class="page-title">
+            <i class="fas fa-chart-line"></i> Painel de Controle Global
+        </h1>
         
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <div class="flashes">
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        {% endwith %}
-
-        <div class="filtro-container">
-            <form action="{{ url_for('master_dashboard') }}" method="get">
-                <label for="filtro_usuario">Filtrar por Usuário:</label>
-                <select name="user_id" id="filtro_usuario" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for usuario in usuarios %}
-                        <option value="{{ usuario[0] }}" {% if filtro_ativo == usuario[0] %}selected{% endif %}>
-                            {{ usuario[1] }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </form>
-        </div>
-
-        <div class="summary-cards">
-            <div class="card">
-                <h3>Total de Vendas</h3>
-                <p>R$ {{ "%.2f"|format(total_vendas) }}</p>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #004085;">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="stat-label">Empresas</div>
+                <div class="stat-number">1</div>
+                <div class="stat-label">ativas</div>
             </div>
-            <div class="card">
-                <h3>Total Recebido</h3>
-                <p>R$ {{ "%.2f"|format(total_recebido) }}</p>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #1cc88a;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-label">Usuários</div>
+                <div class="stat-number">2</div>
+                <div class="stat-label">ativos</div>
             </div>
-            <div class="card" style="background-color: #ffcccc;">
-                <h3>Total Atrasado</h3>
-                <p>R$ {{ "%.2f"|format(total_atrasados) }}</p>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #36b9cc;">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-label">Vendas</div>
+                <div class="stat-number">0</div>
+                <div class="stat-label">totais</div>
             </div>
-            <div class="card">
-                <h3>Total a Receber</h3>
-                <p>R$ {{ "%.2f"|format(total_a_receber) }}</p>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #f6c23e;">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-label">Receita</div>
+                <div class="stat-number">R$ 0,00</div>
+                <div class="stat-label">total</div>
             </div>
         </div>
         
-        {% if pagamentos_atrasados %}
-        <div class="table-container">
-            <h2>Pagamentos Atrasados</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Cliente</th>
-                        <th>Valor</th>
-                        <th>Vencimento</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pagamento in pagamentos_atrasados %}
-                    <tr>
-                        <td>{{ pagamento[0] }}</td>
-                        <td>R$ {{ "%.2f"|format(pagamento[1]) }}</td>
-                        <td>{{ pagamento[2] }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
-
-        <div class="table-container">
-            <h2>Últimas 10 Vendas</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID Venda</th>
-                        <th>Cliente</th>
-                        <th>Valor Total</th>
-                        <th>Entrada</th>
-                        <th>Nº Parcelas</th>
-                        <th>Data</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for venda in vendas_recentes %}
-                    <tr>
-                        <td>{{ venda[0] }}</td>
-                        <td>{{ venda[1] }}</td>
-                        <td>R$ {{ "%.2f"|format(venda[2]) }}</td>
-                        <td>R$ {{ "%.2f"|format(venda[3]) }}</td>
-                        <td>{{ venda[4] }}</td>
-                        <td>{{ venda[5] }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="management-section">
+            <h2><i class="fas fa-cogs"></i> Gestão do Sistema</h2>
+            <p>Gerencie todas as empresas e recursos do sistema:</p>
+            
+            <div class="management-grid">
+                <div class="management-card">
+                    <div class="management-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3 class="management-title">Empresas</h3>
+                    <p class="management-description">
+                        Crie, edite e gerencie todas as empresas do sistema. 
+                        Configure planos e permissões.
+                    </p>
+                    <a href="#" class="btn-primary">
+                        <i class="fas fa-edit"></i> Gerenciar
+                    </a>
+                </div>
+                
+                <div class="management-card">
+                    <div class="management-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3 class="management-title">Administradores</h3>
+                    <p class="management-description">
+                        Gerencie administradores de empresas. 
+                        Defina permissões e níveis de acesso.
+                    </p>
+                    <a href="#" class="btn-primary">
+                        <i class="fas fa-user-edit"></i> Gerenciar
+                    </a>
+                </div>
+                
+                <div class="management-card">
+                    <div class="management-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3 class="management-title">Relatórios</h3>
+                    <p class="management-description">
+                        Visualize métricas globais, relatórios financeiros 
+                        e análises comparativas entre empresas.
+                    </p>
+                    <a href="#" class="btn-primary">
+                        <i class="fas fa-chart-bar"></i> Visualizar
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </body>
