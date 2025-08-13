@@ -1,268 +1,186 @@
-{% extends "base.html" %}
-
-{% block title %}Dashboard - OC CDC{% endblock %}
-{% block page_title %}Dashboard{% endblock %}
-
-{% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="stats mb-4">
-                <div class="row">
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="stat-card h-100">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                            Total de Vendas
-                                        </div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ vendas_recentes|length }}</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="stat-card h-100">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
-                                            Pagamentos Pendentes
-                                        </div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pagamentos_pendentes|length }}</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="stat-card h-100">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                            Valor Total em Vendas
-                                        </div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            R$ {% set total = 0 %}{% for venda in vendas_recentes %}{% set total = total + venda[2] %}{% endfor %}{{ "%.2f"|format(total) }}
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="stat-card h-100">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                            Valor Pendente
-                                        </div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            R$ {% set pendente = 0 %}{% for pagamento in pagamentos_pendentes %}{% set pendente = pendente + pagamento[1] %}{% endfor %}{{ "%.2f"|format(pendente) }}
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema Multiempresa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fb;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .welcome {
+            flex-grow: 1;
+            text-align: center;
+        }
+        
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .companies-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .companies-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .company-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .company-card:hover {
+            border-color: #4e73df;
+        }
+        
+        .company-name {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .company-cnpj {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="welcome">
+            <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+            <p>Bem-vindo, {{ session.get('user_email', 'usuário') }}!</p>
         </div>
-    </div>
+        <a href="/logout" class="btn-logout">
+            <i class="fas fa-sign-out-alt"></i> Sair
+        </a>
+    </nav>
     
-    <div class="row">
-        <div class="col-xl-8 col-lg-7">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-shopping-cart"></i> Vendas Recentes
-                    </h6>
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #4e73df;">
+                    <i class="fas fa-building"></i>
                 </div>
-                <div class="card-body">
-                    {% if vendas_recentes %}
-                    <div class="table-responsive">
-                        <table class="table table-bordered" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Cliente</th>
-                                    <th>Valor Total</th>
-                                    <th>Data</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for venda in vendas_recentes %}
-                                <tr>
-                                    <td>{{ venda[0] }}</td>
-                                    <td>{{ venda[1] }}</td>
-                                    <td>R$ {{ "%.2f"|format(venda[2]) }}</td>
-                                    <td>{{ venda[3].strftime('%d/%m/%Y') }}</td>
-                                    <td><span class="status ativa">{{ venda[4] }}</span></td>
-                                    <td>
-                                        <a href="{{ url_for('gerar_contrato', venda_id=venda[0]) }}" class="btn btn-success btn-sm" target="_blank">
-                                            <i class="fas fa-file-pdf"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <p class="text-center">Nenhuma venda recente encontrada.</p>
-                    {% endif %}
+                <div class="stat-label">Empresas</div>
+                <div class="stat-number">{{ companies|length }}</div>
+                <div class="stat-label">ativas</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #1cc88a;">
+                    <i class="fas fa-users"></i>
                 </div>
+                <div class="stat-label">Usuários</div>
+                <div class="stat-number">0</div>
+                <div class="stat-label">cadastrados</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #36b9cc;">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-label">Vendas</div>
+                <div class="stat-number">0</div>
+                <div class="stat-label">este mês</div>
             </div>
         </div>
         
-        <div class="col-xl-4 col-lg-5">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-money-bill-wave"></i> Pagamentos Pendentes
-                    </h6>
-                </div>
-                <div class="card-body">
-                    {% if pagamentos_pendentes %}
-                    <div class="table-responsive">
-                        <table class="table table-bordered" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Cliente</th>
-                                    <th>Valor</th>
-                                    <th>Vencimento</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for pagamento in pagamentos_pendentes %}
-                                <tr>
-                                    <td>{{ pagamento[0] }}</td>
-                                    <td>R$ {{ "%.2f"|format(pagamento[1]) }}</td>
-                                    <td>
-                                        {{ pagamento[2].strftime('%d/%m/%Y') }}
-                                        {% set dias = ((pagamento[2] - datetime.now().date()).days) %}
-                                        {% if dias < 0 %}
-                                            <span class="status atrasada d-block mt-1">{{ dias * -1 }} dias atrasado</span>
-                                        {% elif dias == 0 %}
-                                            <span class="status pendente d-block mt-1">Vence hoje</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+        <div class="companies-section">
+            <h2><i class="fas fa-building"></i> Suas Empresas</h2>
+            <p>Selecione uma empresa abaixo para gerenciar suas operações:</p>
+            
+            <div class="companies-list">
+                {% for company in companies %}
+                <div class="company-card">
+                    <div class="company-name">{{ company[1] }}</div>
+                    <div class="company-cnpj">CNPJ: {{ company[2] or 'Não informado' }}</div>
+                    <div class="company-status">
+                        <span class="status-badge" style="background: #d4edda; color: #155724; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">
+                            <i class="fas fa-check-circle"></i> Ativa
+                        </span>
                     </div>
-                    {% else %}
-                    <p class="text-center">Nenhum pagamento pendente encontrado.</p>
-                    {% endif %}
                 </div>
+                {% endfor %}
             </div>
         </div>
     </div>
-    
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-line"></i> Resumo
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5>Atalhos Rápidos</h5>
-                            <div class="mt-3">
-                                <a href="{{ url_for('vendas') }}" class="btn btn-primary mr-2 mb-2">
-                                    <i class="fas fa-plus"></i> Nova Venda
-                                </a>
-                                <a href="#" class="btn btn-secondary mr-2 mb-2">
-                                    <i class="fas fa-user-plus"></i> Novo Cliente
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h5>Últimas Atividades</h5>
-                            <ul class="list-group mt-3">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Sistema iniciado
-                                    <span class="badge badge-primary badge-pill">Agora</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Dashboard atualizado
-                                    <span class="badge badge-secondary badge-pill">Recente</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    .stat-card {
-        border-radius: 0.5rem;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-        border: 0;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 0.25rem 2rem 0 rgba(58, 59, 69, 0.25);
-    }
-    
-    .table-responsive {
-        overflow-x: auto;
-    }
-    
-    .table th {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-    }
-    
-    .table td, .table th {
-        vertical-align: middle;
-    }
-    
-    .btn-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-    }
-    
-    .card {
-        border-radius: 0.5rem;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-        border: 0;
-    }
-    
-    .card-header {
-        border-radius: 0.5rem 0.5rem 0 0 !important;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    }
-</style>
-{% endblock %}
+</body>
+</html>

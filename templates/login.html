@@ -3,242 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - OC CDC</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title>Login - Sistema Multiempresa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #007bff;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --warning-color: #ffc107;
-            --info-color: #17a2b8;
-            --light-color: #f8f9fa;
-            --dark-color: #343a40;
-            --white: #ffffff;
-            --gray-100: #f8f9fa;
-            --gray-200: #e9ecef;
-            --gray-300: #dee2e6;
-            --gray-400: #ced4da;
-            --gray-500: #adb5bd;
-            --gray-600: #6c757d;
-            --gray-700: #495057;
-            --gray-800: #343a40;
-            --gray-900: #212529;
-            --border-radius: 0.375rem;
-            --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            --box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: var(--gray-800);
-            line-height: 1.6;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
-
+        
         .login-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
             width: 100%;
-            max-width: 450px;
-            background-color: var(--white);
-            padding: 40px;
-            box-shadow: var(--box-shadow-lg);
-            border-radius: var(--border-radius);
+            max-width: 400px;
         }
-
+        
         .login-header {
+            background: #4e73df;
+            color: white;
+            padding: 30px 20px;
             text-align: center;
-            margin-bottom: 35px;
         }
-
+        
         .login-header h1 {
-            color: var(--dark-color);
-            font-size: 2rem;
-            font-weight: 600;
-            margin-bottom: 10px;
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 5px;
         }
-
+        
         .login-header p {
-            color: var(--gray-600);
-            font-size: 1.1rem;
+            opacity: 0.9;
+            font-size: 14px;
         }
-
-        .login-icon {
-            font-size: 3.5rem;
-            color: var(--primary-color);
+        
+        .login-form {
+            padding: 30px;
+        }
+        
+        .form-group {
             margin-bottom: 20px;
         }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
+        
+        .form-group label {
             display: block;
             margin-bottom: 8px;
+            color: #333;
             font-weight: 500;
-            color: var(--gray-700);
         }
-
-        .input-group {
+        
+        .form-group .input-group {
             position: relative;
         }
-
-        .input-group-prepend {
+        
+        .form-group .input-group i {
             position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            background-color: var(--gray-100);
-            border: 1px solid var(--gray-300);
-            border-right: none;
-            border-radius: var(--border-radius) 0 0 var(--border-radius);
-            color: var(--gray-600);
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
         }
-
-        .input-group input {
-            padding-left: 50px;
-        }
-
-        input[type="email"], input[type="password"] {
+        
+        .form-group input {
             width: 100%;
-            padding: 14px 15px;
-            border: 1px solid var(--gray-300);
-            border-radius: var(--border-radius);
-            box-sizing: border-box;
-            font-size: 1rem;
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            padding: 12px 12px 12px 40px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
         }
-
-        input[type="email"]:focus, input[type="password"]:focus {
-            border-color: var(--primary-color);
-            outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        
+        .form-group input:focus {
+            border-color: #4e73df;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
         }
-
-        button[type="submit"] {
-            background-color: var(--primary-color);
-            color: var(--white);
+        
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #4e73df;
+            color: white;
             border: none;
-            padding: 15px 25px;
-            font-size: 1.1rem;
+            border-radius: 5px;
+            font-size: 16px;
             font-weight: 500;
             cursor: pointer;
-            border-radius: var(--border-radius);
-            transition: background-color 0.2s ease;
-            width: 100%;
-            margin-top: 10px;
+            transition: background 0.3s;
         }
-
-        button[type="submit"]:hover {
-            background-color: #0069d9;
+        
+        .btn-login:hover {
+            background: #2e59d9;
         }
-
+        
         .alert {
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            border: 1px solid transparent;
-            border-radius: var(--border-radius);
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
         }
-
+        
         .alert-success {
+            background: #d4edda;
             color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
+            border: 1px solid #c3e6cb;
         }
-
+        
         .alert-error {
+            background: #f8d7da;
             color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
+            border: 1px solid #f5c6cb;
         }
-
-        .login-footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--gray-300);
-            color: var(--gray-600);
-            font-size: 0.9rem;
+        
+        .alert-info {
+            background: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
         }
-
-        @media (max-width: 576px) {
-            .login-container {
-                padding: 30px 20px;
-            }
-            
-            .login-header h1 {
-                font-size: 1.7rem;
-            }
-            
-            input[type="email"], input[type="password"] {
-                padding: 12px 12px 12px 45px;
-            }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-header">
-            <div class="login-icon">
-                <i class="fas fa-lock"></i>
-            </div>
-            <h1>OC CDC</h1>
+            <i class="fas fa-lock fa-3x mb-3"></i>
+            <h1>Sistema Multiempresa</h1>
             <p>Faça login para acessar o sistema</p>
         </div>
         
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        
-        <form method="POST" action="{{ url_for('login') }}">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
+        <div class="login-form">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-group">
                         <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" required>
                     </div>
-                    <input type="email" id="email" name="email" required>
                 </div>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Senha:</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <i class="fas fa-key"></i>
+                
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" required>
                     </div>
-                    <input type="password" id="password" name="password" required>
                 </div>
-            </div>
-
-            <button type="submit">
-                <i class="fas fa-sign-in-alt"></i> Entrar
-            </button>
-        </form>
-        
-        <div class="login-footer">
-            <p>© 2025 OC CDC. Todos os direitos reservados.</p>
+                
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Entrar
+                </button>
+            </form>
         </div>
     </div>
 </body>

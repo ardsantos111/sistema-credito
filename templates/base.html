@@ -97,6 +97,15 @@
             padding: 15px 0;
         }
 
+        .sidebar-menu-item.master-only {
+            display: none;
+        }
+        
+        /* Mostrar itens master-only apenas para usuários master */
+        .user-role-master .sidebar-menu-item.master-only {
+            display: block;
+        }
+
         .sidebar-menu-item {
             display: block;
             color: var(--gray400);
@@ -105,29 +114,32 @@
             transition: all 0.2s ease;
             border-left: 3px solid transparent;
         }
-
+        
         .sidebar-menu-item:hover {
             color: var(--white);
             background-color: rgba(255, 255, 255, 0.05);
             border-left-color: var(--primary);
         }
-
+        
         .sidebar-menu-item.active {
             color: var(--white);
             background-color: rgba(0, 123, 255, 0.1);
             border-left-color: var(--primary);
         }
-
+        
         .sidebar-menu-item i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
-
-        .sidebar-footer {
-            margin-top: auto;
-            padding: 15px 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        
+        .sidebar-menu-item.master-only {
+            display: none;
+        }
+        
+        /* Mostrar itens master-only apenas para usuários master */
+        .user-role-master .sidebar-menu-item.master-only {
+            display: block;
         }
 
         .sidebar-footer a {
@@ -255,7 +267,7 @@
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="{% if session.user_role == 'master' %}user-role-master{% endif %}">
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
@@ -306,6 +318,22 @@
             <a href="#" class="sidebar-menu-item">
                 <i class="fas fa-cog"></i>
                 <span>Configurações</span>
+            </a>
+            
+            <!-- Itens exclusivos para master -->
+            <a href="{{ url_for('master_dashboard') }}" class="sidebar-menu-item master-only {% if request.endpoint == 'master_dashboard' %}active{% endif %}">
+                <i class="fas fa-globe-americas"></i>
+                <span>Dashboard Master</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item master-only">
+                <i class="fas fa-building"></i>
+                <span>Gestão de Empresas</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item master-only">
+                <i class="fas fa-user-shield"></i>
+                <span>Administradores</span>
             </a>
         </div>
         
