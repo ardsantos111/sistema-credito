@@ -10,13 +10,16 @@ def get_db_connection():
         database_url = os.environ.get('DATABASE_URL')
         
         # Analisar a URL do banco de dados
-        from urllib.parse import urlparse
+        from urllib.parse import urlparse, unquote
         url = urlparse(database_url)
+        
+        # Decodificar a senha para lidar com caracteres especiais
+        decoded_password = unquote(url.password) if url.password else None
         
         # Conectar ao banco de dados
         return pg8000.dbapi.connect(
             user=url.username,
-            password=url.password,
+            password=decoded_password,
             host=url.hostname,
             port=url.port,
             database=url.path[1:]
