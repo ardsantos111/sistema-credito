@@ -2,11 +2,12 @@ import os
 import io
 import pg8000.dbapi
 
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, send_from_directory
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
+
 # Tornar a importação do weasyprint opcional para ambientes que não o suportam
 try:
     from weasyprint import HTML
@@ -14,7 +15,6 @@ try:
 except ImportError:
     WEASYPRINT_AVAILABLE = False
     print("WeasyPrint não está disponível. A geração de PDFs será desativada.")
-
 
 app = Flask(__name__)
 
@@ -38,20 +38,19 @@ class User(UserMixin):
 def get_db_connection():
     try:
         # Usar a URL do banco de dados correta diretamente
-        database_url = "postgresql://postgres:Am461271%40am461271@db.guqrxjjrpmfbeftwmokz.supabase.co:5432/postgres"
-        print(f"Tentando conectar ao banco de dados: {database_url}")
+        database_url = app.config['DATABASE_URL']
+        print(f"[LOG] Tentando conectar ao banco de dados: {database_url[:20]}...")
         
         # Analisar a URL do banco de dados
-        from urllib.parse import urlparse, unquote
         url = urlparse(database_url)
         
         # Decodificar a senha para lidar com caracteres especiais
         decoded_password = unquote(url.password) if url.password else None
-        print(f"Usuário: {url.username}")
-        print(f"Host: {url.hostname}")
-        print(f"Porta: {url.port}")
-        print(f"Banco de dados: {url.path[1:]}")
-        print(f"Senha decodificada: {'*' * len(decoded_password) if decoded_password else 'None'}")
+        print(f"[LOG] Usuário: {url.username}")
+        print(f"[LOG] Host: {url.hostname}")
+        print(f"[LOG] Porta: {url.port}")
+        print(f"[LOG] Banco de dados: {url.path[1:]}")
+        print(f"[LOG] Senha decodificada: {'*' * len(decoded_password) if decoded_password else 'None'}")
         
         # Conectar ao banco de dados
         conn = pg8000.dbapi.connect(
@@ -62,11 +61,11 @@ def get_db_connection():
             database=url.path[1:]
         )
         
-        print("Conexão com o banco de dados estabelecida com sucesso!")
+        print("[LOG] Conexão com o banco de dados estabelecida com sucesso!")
         return conn
         
     except Exception as e:
-        print(f"Erro na conexão com o banco: {str(e)}")
+        print(f"[ERRO] Erro na conexão com o banco: {str(e)}")
         import traceback
         traceback.print_exc()
         return None
@@ -117,40 +116,42 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    print("[LOG] Acessando rota de login")
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        print(f"Tentando login com email: {email}")
+        print(f"[LOG] Tentando login com email: {email}")
         
         conn = get_db_connection()
         if not conn:
-            print("Falha ao conectar ao banco de dados")
+            print("[ERRO] Falha ao conectar ao banco de dados")
             flash('Erro ao conectar ao banco de dados', 'error')
             return redirect(url_for('login'))
         
         try:
             cur = conn.cursor()
-            print("Executando consulta de usuário")
+            print("[LOG] Executando consulta de usuário")
             cur.execute("SELECT id, email, password, empresa_id FROM users WHERE email = %s", (email,))
             user_data = cur.fetchone()
-            print(f"Dados do usuário encontrados: {user_data is not None}")
+            print(f"[LOG] Dados do usuário encontrados: {user_data is not None}")
             cur.close()
             conn.close()
             
             if user_data and check_password_hash(user_data[2], password):
                 user = User(user_data[0], user_data[1], user_data[2], user_data[3])
                 login_user(user)
-                print("Login bem-sucedido")
+                print("[LOG] Login bem-sucedido")
                 return redirect(url_for('dashboard'))
             
-            print("Email ou senha incorretos")
+            print("[LOG] Email ou senha incorretos")
             flash('Email ou senha incorretos', 'error')
         except Exception as e:
-            print(f"Erro no login: {str(e)}")
+            print(f"[ERRO] Erro no login: {str(e)}")
             import traceback
             traceback.print_exc()
             flash('Erro ao realizar login', 'error')
         
+    print("[LOG] Renderizando página de login")
     return render_template('login.html')
 
 @app.route('/dashboard')
