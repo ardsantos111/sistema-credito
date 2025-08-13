@@ -9,6 +9,88 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# ... (outros imports permanecem iguais)
+
+@app.route('/create-test-user')
+def create_test_user():
+    """Rota para criar um usuário de teste"""
+    print("[LOG] Acessando rota de criação de usuário de teste")
+    try:
+        # Conectar ao banco de dados
+        conn = get_db_connection()
+        if not conn:
+            print("[ERRO] Falha ao conectar ao banco de dados")
+            return jsonify({
+                "success": False,
+                "message": "Falha ao conectar ao banco de dados"
+            }), 500
+        
+        # Verificar se já existe uma empresa
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM empresas LIMIT 1")
+        empresa = cur.fetchone()
+        
+        if not empresa:
+            # Criar empresa de teste se não existir
+            print("[LOG] Criando empresa de teste")
+            cur.execute("INSERT INTO empresas (nome_empresa, cnpj) VALUES (%s, %s) RETURNING id", 
+                       ("Empresa de Teste", "00.000.000/0000-00"))
+            empresa_id = cur.fetchone()[0]
+        else:
+            empresa_id = empresa[0]
+        
+        # Verificar se o usuário de teste já existe
+        cur.execute("SELECT id FROM users WHERE email = %s", ("teste@example.com",))
+        user = cur.fetchone()
+        
+        if user:
+            print("[LOG] Usuário de teste já existe")
+            cur.close()
+            conn.close()
+            return jsonify({
+                "success": True,
+                "message": "Usuário de teste já existe",
+                "credentials": {
+                    "email": "teste@example.com",
+                    "password": "teste123"
+                }
+            })
+        
+        # Criar usuário de teste
+        print("[LOG] Criando usuário de teste")
+        hashed_password = generate_password_hash("teste123")
+        cur.execute("""
+            INSERT INTO users (email, password, empresa_id) 
+            VALUES (%s, %s, %s) 
+            RETURNING id
+        """, ("teste@example.com", hashed_password, empresa_id))
+        
+        user_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        print("[LOG] Usuário de teste criado com sucesso")
+        return jsonify({
+            "success": True,
+            "message": "Usuário de teste criado com sucesso!",
+            "credentials": {
+                "email": "teste@example.com",
+                "password": "teste123"
+            }
+        })
+        
+    except Exception as e:
+        print(f"[ERRO] Erro ao criar usuário de teste: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        return jsonify({
+            "success": False,
+            "message": f"Erro ao criar usuário de teste: {str(e)}",
+            "error_type": type(e).__name__
+        }), 500
+
 # Tornar a importação do weasyprint opcional para ambientes que não o suportam
 try:
     from weasyprint import HTML
