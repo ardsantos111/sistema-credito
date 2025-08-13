@@ -21,11 +21,11 @@ app = Flask(__name__)
 
 # Configurações
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'chave_secreta_temporaria')
-# Configurar parâmetros do banco de dados separadamente (usando variáveis de ambiente)
-app.config['DB_HOST'] = os.environ.get('DB_HOST', 'db.guqrxjjrpmfbeftwmokz.supabase.co')
-app.config['DB_PORT'] = int(os.environ.get('DB_PORT', 5432))
+# Configurar parâmetros do banco de dados separadamente (usando Transaction Pooler IPv4 compatível)
+app.config['DB_HOST'] = os.environ.get('DB_HOST', 'aws-1-sa-east-1.pooler.supabase.com')
+app.config['DB_PORT'] = int(os.environ.get('DB_PORT', 6543))
 app.config['DB_NAME'] = os.environ.get('DB_NAME', 'postgres')
-app.config['DB_USER'] = os.environ.get('DB_USER', 'postgres')
+app.config['DB_USER'] = os.environ.get('DB_USER', 'postgres.guqrxjjrpmfbeftwmokz')
 app.config['DB_PASSWORD'] = os.environ.get('DB_PASSWORD', 'Am461271@am461271')
 
 # Configuração do Flask-Login
