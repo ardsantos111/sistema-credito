@@ -56,15 +56,21 @@ def get_db_connection():
         print(f"[LOG] User: {user}")
         print(f"[LOG] Password: {'*' * len(password)}")
         
-        # Conectar ao banco de dados com timeout (sem SSL para teste)
+        # Criar contexto SSL explícito
+        import ssl
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        # Conectar ao banco de dados com timeout e SSL
         conn = pg8000.dbapi.connect(
             user=user,
             password=password,
             host=host,
             port=port,
             database=database,
-            timeout=30
-            # Removido ssl_context temporariamente para teste
+            timeout=30,
+            ssl_context=ssl_context
         )
         
         print("[LOG] Conexão com o banco de dados estabelecida com sucesso!")
@@ -95,7 +101,13 @@ def test_db():
         print(f"[LOG] User: {user}")
         print(f"[LOG] Password: {'*' * len(password)}")
         
-        # Conectar ao banco de dados com timeout (sem SSL para teste)
+        # Criar contexto SSL explícito
+        import ssl
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        # Conectar ao banco de dados com timeout e SSL
         print("[LOG] Tentando conectar ao banco de dados...")
         conn = pg8000.dbapi.connect(
             user=user,
@@ -103,8 +115,8 @@ def test_db():
             host=host,
             port=port,
             database=database,
-            timeout=30
-            # Removido ssl_context temporariamente para teste
+            timeout=30,
+            ssl_context=ssl_context
         )
         
         # Testar uma consulta simples
