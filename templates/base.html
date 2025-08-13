@@ -263,8 +263,13 @@
         </div>
         
         <div class="sidebar-user">
+            {% if current_user.is_authenticated %}
             <span class="user-name">{{ current_user.email.split('@')[0] | title }}</span>
             <span class="user-email">{{ current_user.email }}</span>
+            {% else %}
+            <span class="user-name">Visitante</span>
+            <span class="user-email">Não autenticado</span>
+            {% endif %}
         </div>
         
         <div class="sidebar-menu">
