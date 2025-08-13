@@ -70,6 +70,9 @@
         .assinatura-nome {
             font-size: 9pt;
         }
+        b {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -81,10 +84,10 @@
     <div class="section">
         <h2>IDENTIFICAÇÃO DAS PARTES</h2>
         <p>
-            **VENDEDOR(A):** {{ nome_loja }}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº {{ cnpj_loja }}, com sede em {{ endereco_loja }}.
+            <b>VENDEDOR(A):</b> {{ nome_loja }}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº {{ cnpj_loja }}, com sede em {{ endereco_loja }}.
         </p>
         <p>
-            **COMPRADOR(A):** {{ nome_cliente }}, inscrito(a) no CPF nº {{ cpf_cliente }}, residente e domiciliado(a) em {{ endereco_completo }}.
+            <b>COMPRADOR(A):</b> {{ nome_cliente }}, inscrito(a) no CPF nº {{ cpf_cliente }}, residente e domiciliado(a) em {{ endereco_completo }}.
         </p>
     </div>
 
@@ -119,9 +122,9 @@
         <p>O(a) COMPRADOR(A) se compromete a pagar o valor total de R$ {{ "%.2f"|format(valor_total) }} da seguinte forma:</p>
         <ul>
             {% if valor_entrada > 0 %}
-            <li>**Entrada:** R$ {{ "%.2f"|format(valor_entrada) }}</li>
+            <li><b>Entrada:</b> R$ {{ "%.2f"|format(valor_entrada) }}</li>
             {% endif %}
-            <li>**Parcelas:** {{ num_parcelas }} parcelas de R$ {{ "%.2f"|format(valor_parcela) }} cada.</li>
+            <li><b>Parcelas:</b> {{ num_parcelas }} parcelas de R$ {{ "%.2f"|format(valor_parcela) }} cada.</li>
         </ul>
 
         <table class="parcelas-table">
@@ -156,11 +159,11 @@
     <div class="assinaturas">
         <div>
             <div class="linha"></div>
-            <div class="assinatura-nome">**Vendedor(a):** {{ nome_loja }}</div>
+            <div class="assinatura-nome"><b>Vendedor(a):</b> {{ nome_loja }}</div>
         </div>
         <div>
             <div class="linha"></div>
-            <div class="assinatura-nome">**Comprador(a):** {{ nome_cliente }}</div>
+            <div class="assinatura-nome"><b>Comprador(a):</b> {{ nome_cliente }}</div>
         </div>
     </div>
 </body>

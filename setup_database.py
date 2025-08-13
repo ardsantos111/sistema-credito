@@ -1,24 +1,18 @@
 import os
 import pg8000.dbapi
-import re
-from urllib.parse import urlparse
 from dotenv import load_dotenv
 
 load_dotenv()
 
 def get_db_connection():
     try:
-        database_url = os.environ.get('DATABASE_URL')
-        match = re.match(r"postgres://(.*?):(.*?)@(.*?)(?::(\d+))?/(.*)", database_url)
-        user, password, host, port, database = match.groups()
-        port = int(port) if port else 5432
+        # Conectar diretamente com os parâmetros separados para evitar problemas de codificação
         return pg8000.dbapi.connect(
-            user=user,
-            password=password,
-            host=host,
-            port=port,
-            database=database.split("?")[0],
-            ssl_context=True
+            user="postgres",
+            password="Am461271@am461271",
+            host="db.guqrxjjrpmfbeftwmokz.supabase.co",
+            port=5432,
+            database="postgres"
         )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")

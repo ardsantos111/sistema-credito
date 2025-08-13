@@ -7,6 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
+from weasyprint import HTML
 
 
 app = Flask(__name__)
@@ -29,15 +30,13 @@ class User(UserMixin):
 
 def get_db_connection():
     try:
-        database_url = app.config['DATABASE_URL']
-        url = urlparse(database_url)
+        # Conectar diretamente com os parâmetros separados para evitar problemas de codificação
         return pg8000.dbapi.connect(
-            user=url.username,
-            password=url.password,
-            host=url.hostname,
-            port=url.port,
-            database=url.path[1:],
-            ssl_context=True
+            user="postgres",
+            password="Am461271@am461271",
+            host="db.guqrxjjrpmfbeftwmokz.supabase.co",
+            port=5432,
+            database="postgres"
         )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
@@ -168,11 +167,11 @@ def vendas():
             cur = conn.cursor()
             # Inserir venda
             cur.execute("""
-                INSERT INTO vendas (cliente_id, empresa_id, valor_total, valor_entrada, 
+                INSERT INTO vendas (cliente_id, empresa_id, user_id, valor_total, valor_entrada, 
                                   num_parcelas, data_venda, status)
-                VALUES (%s, %s, %s, %s, %s, %s, 'ativa')
+                VALUES (%s, %s, %s, %s, %s, %s, %s, 'ativa')
                 RETURNING id
-            """, (cliente_id, current_user.empresa_id, valor_total, valor_entrada,
+            """, (cliente_id, current_user.empresa_id, current_user.id, valor_total, valor_entrada,
                  num_parcelas, datetime.now()))
             
             venda_id = cur.fetchone()[0]
@@ -219,61 +218,105 @@ def vendas():
         print(f"Erro na página de vendas: {str(e)}")
         return redirect(url_for('dashboard'))
 
-#@app.route('/gerar_contrato/<int:venda_id>')
-#@login_required
-#def gerar_contrato(venda_id):
-#    conn = get_db_connection()
-#    if not conn:
-#        flash('Erro ao conectar ao banco de dados', 'error')
-#        return redirect(url_for('vendas'))
-#    
-#    try:
-#        cur = conn.cursor()
-#        # Buscar dados da venda
-#        cur.execute("""
-#            SELECT v.*, c.nome, c.cpf, c.endereco, e.nome_empresa, e.cnpj
-#            FROM vendas v
-#            JOIN clientes c ON v.cliente_id = c.id
-#            JOIN empresas e ON v.empresa_id = e.id
-#            WHERE v.id = %s AND v.empresa_id = %s
-#        """, (venda_id, current_user.empresa_id))
-#        
-#        venda_data = cur.fetchone()
-#        
-#        if not venda_data:
-#            flash('Venda não encontrada', 'error')
-#            return redirect(url_for('vendas'))
-#        
-#        # Buscar parcelas
-#        cur.execute("""
-#            SELECT valor, data_vencimento
-#            FROM pagamentos
-#            WHERE venda_id = %s
-#            ORDER BY data_vencimento
-#        """, (venda_id,))
-#        parcelas = cur.fetchall()
-#        
-#        cur.close()
-#        conn.close()
-#        
-#        # Gerar PDF
-#        html = render_template('contrato_pdf.html',
-#                             venda=venda_data,
-#                             parcelas=parcelas)
-#        
-#        pdf = HTML(string=html).write_pdf()
-#        
-#        return send_file(
-#            io.BytesIO(pdf),
-#            mimetype='application/pdf',
-#            download_name=f'contrato_venda_{venda_id}.pdf',
-#            as_attachment=True
-#        )
-#        
-#    except Exception as e:
-#        flash('Erro ao gerar contrato', 'error')
-#        print(f"Erro ao gerar contrato: {str(e)}")
-#        return redirect(url_for('vendas'))
+@app.route('/gerar_contrato/<int:venda_id>')
+@login_required
+def gerar_contrato(venda_id):
+    conn = get_db_connection()
+    if not conn:
+        flash('Erro ao conectar ao banco de dados', 'error')
+        return redirect(url_for('vendas'))
+    
+    try:
+        cur = conn.cursor()
+        # Buscar dados da venda
+        cur.execute("""
+            SELECT v.*, c.nome as nome_cliente, c.cpf, c.endereco as endereco_cliente, 
+                   e.nome_empresa, e.cnpj, u.email as vendedor_nome
+            FROM vendas v
+            JOIN clientes c ON v.cliente_id = c.id
+            JOIN empresas e ON v.empresa_id = e.id
+            JOIN users u ON v.user_id = u.id
+            WHERE v.id = %s AND v.empresa_id = %s
+        """, (venda_id, current_user.empresa_id))
+        
+        venda_data = cur.fetchone()
+        
+        if not venda_data:
+            flash('Venda não encontrada', 'error')
+            return redirect(url_for('vendas'))
+        
+        # Buscar dados da loja
+        cur.execute("SELECT nome, endereco FROM loja LIMIT 1")
+        loja_data = cur.fetchone()
+        
+        if not loja_data:
+            flash('Dados da loja não encontrados', 'error')
+            return redirect(url_for('vendas'))
+        
+        # Buscar parcelas
+        cur.execute("""
+            SELECT valor, data_vencimento
+            FROM pagamentos
+            WHERE venda_id = %s
+            ORDER BY data_vencimento
+        """, (venda_id,))
+        parcelas = cur.fetchall()
+        
+        cur.close()
+        conn.close()
+        
+        # Preparar dados para o template
+        valor_total = venda_data[4]  # valor_total
+        valor_entrada = venda_data[5]  # valor_entrada
+        num_parcelas = venda_data[6]  # num_parcelas
+        valor_restante = valor_total - valor_entrada
+        valor_parcela = valor_restante / num_parcelas if num_parcelas > 0 else 0
+        
+        # Gerar datas de vencimento
+        datas_vencimento = [p[1].strftime('%d/%m/%Y') for p in parcelas]
+        
+        # Cláusulas padrão
+        clausulas = [
+            "O COMPRADOR(A) declara ter plena capacidade legal para celebrar o presente contrato.",
+            "O(A) COMPRADOR(A) recebeu os produtos conforme descrito neste contrato e os reconhece em perfeito estado.",
+            "Fica acordado que o não pagamento de qualquer parcela implicará na rescisão automática do contrato e na exigibilidade imediata do saldo devedor.",
+            "Em caso de inadimplência, o(a) COMPRADOR(A) pagará multa de 2% sobre o valor em atraso e juros de 1% ao mês.",
+            "O(A) COMPRADOR(A) autoriza expressamente a compensação de quaisquer créditos em seu favor com débitos de sua responsabilidade perante o VENDEDOR(A)."
+        ]
+        
+        # Gerar PDF
+        html = render_template('contrato_pdf.html',
+                             ov_numero=venda_id,
+                             nome_loja=loja_data[0],
+                             cnpj_loja=venda_data[12],  # cnpj
+                             endereco_loja=loja_data[1],
+                             nome_cliente=venda_data[8],  # nome_cliente
+                             cpf_cliente=venda_data[9],   # cpf
+                             endereco_completo=venda_data[10],  # endereco_cliente
+                             descricao_venda="Produtos diversos",
+                             valor_total=valor_total,
+                             forma_pagamento="A prazo",
+                             vendedor_nome=venda_data[13],  # vendedor_nome
+                             observacoes="Nenhuma observação",
+                             valor_entrada=valor_entrada,
+                             num_parcelas=num_parcelas,
+                             valor_parcela=valor_parcela,
+                             datas_vencimento=datas_vencimento,
+                             clausulas=clausulas)
+        
+        pdf = HTML(string=html).write_pdf()
+        
+        return send_file(
+            io.BytesIO(pdf),
+            mimetype='application/pdf',
+            download_name=f'contrato_venda_{venda_id}.pdf',
+            as_attachment=True
+        )
+        
+    except Exception as e:
+        flash('Erro ao gerar contrato', 'error')
+        print(f"Erro ao gerar contrato: {str(e)}")
+        return redirect(url_for('vendas'))
 
 @app.route('/logout')
 @login_required
