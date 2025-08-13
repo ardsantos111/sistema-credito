@@ -7,20 +7,9 @@
       "config": {
         "buildCommand": "pip install -r requirements.txt"
       }
-    },
-    {
-      "src": "db_test.py",
-      "use": "@vercel/python",
-      "config": {
-        "buildCommand": "pip install -r requirements.txt"
-      }
     }
   ],
   "routes": [
-    {
-      "src": "/test-db",
-      "dest": "db_test.py"
-    },
     {
       "src": "/(.*)",
       "dest": "app.py"

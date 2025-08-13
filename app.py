@@ -1,9 +1,10 @@
 import os
 import io
+import json
 import pg8000.dbapi
 
 from urllib.parse import urlparse, unquote
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, send_from_directory, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -69,6 +70,60 @@ def get_db_connection():
         import traceback
         traceback.print_exc()
         return None
+
+@app.route('/test-db')
+def test_db():
+    """Rota para testar a conexão com o banco de dados"""
+    print("[LOG] Acessando rota de teste do banco de dados")
+    try:
+        # Usar a URL do banco de dados correta diretamente
+        database_url = app.config['DATABASE_URL']
+        print(f"[LOG] URL do banco de dados: {database_url[:20]}...")
+        
+        # Analisar a URL do banco de dados
+        url = urlparse(database_url)
+        
+        # Decodificar a senha para lidar com caracteres especiais
+        decoded_password = unquote(url.password) if url.password else None
+        
+        # Conectar ao banco de dados
+        print("[LOG] Tentando conectar ao banco de dados...")
+        conn = pg8000.dbapi.connect(
+            user=url.username,
+            password=decoded_password,
+            host=url.hostname,
+            port=url.port,
+            database=url.path[1:]
+        )
+        
+        # Testar uma consulta simples
+        print("[LOG] Executando consulta de teste...")
+        cur = conn.cursor()
+        cur.execute("SELECT version();")
+        version = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        result = {
+            "success": True,
+            "message": "Conexão com o banco de dados estabelecida com sucesso!",
+            "database_version": version[0] if version else "Desconhecida"
+        }
+        
+        print(f"[LOG] Teste concluído com sucesso: {result}")
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"[ERRO] Erro no teste do banco de dados: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        result = {
+            "success": False,
+            "message": f"Erro na conexão com o banco de dados: {str(e)}",
+            "error_type": type(e).__name__
+        }
+        return jsonify(result), 500
 
 @login_manager.user_loader
 def load_user(user_id):
