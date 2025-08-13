@@ -35,7 +35,7 @@ def test_connection():
         return {
             "success": True,
             "message": "Conexão com o banco de dados estabelecida com sucesso!",
-            "database_version": version[0]
+            "database_version": version[0] if version else "Desconhecida"
         }
         
     except Exception as e:
@@ -47,19 +47,34 @@ def test_connection():
 
 def handler(event, context):
     """Handler para a Vercel"""
-    result = test_connection()
-    
-    # Retornar resposta JSON
-    return {
-        "statusCode": 200 if result["success"] else 500,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-        },
-        "body": json.dumps(result, indent=2)
-    }
+    try:
+        result = test_connection()
+        
+        # Retornar resposta JSON
+        return {
+            "statusCode": 200 if result["success"] else 500,
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+            },
+            "body": json.dumps(result, indent=2, ensure_ascii=False)
+        }
+    except Exception as e:
+        # Em caso de erro no handler em si
+        return {
+            "statusCode": 500,
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+            },
+            "body": json.dumps({
+                "success": False,
+                "message": f"Erro no handler: {str(e)}",
+                "error_type": type(e).__name__
+            }, indent=2, ensure_ascii=False)
+        }
 
 # Para testes locais
 if __name__ == "__main__":
     result = test_connection()
-    print(json.dumps(result, indent=2))
+    print(json.dumps(result, indent=2, ensure_ascii=False))
