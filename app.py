@@ -21,8 +21,8 @@ app = Flask(__name__)
 
 # Configurações
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'chave_secreta_temporaria')
-# Configurar parâmetros do banco de dados separadamente
-app.config['DB_HOST'] = "db.guqrxjjrpmfbeftwmokz.supabase.co"
+# Configurar parâmetros do banco de dados separadamente (usando connection pooling)
+app.config['DB_HOST'] = "guqrxjjrpmfbeftwmokz.sa-east-1.pooler.supabase.com"
 app.config['DB_PORT'] = 5432
 app.config['DB_NAME'] = "postgres"
 app.config['DB_USER'] = "postgres"
