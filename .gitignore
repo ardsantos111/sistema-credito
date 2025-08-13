@@ -1,3 +1,4 @@
 .env
 .vscode/
 test_db_connection.py
+test_db_vercel.py
