@@ -4,10 +4,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Usar a URL do banco de dados correta diretamente
+DATABASE_URL = "postgresql://postgres:Am461271%40am461271@db.guqrxjjrpmfbeftwmokz.supabase.co:5432/postgres"
+
 def get_db_connection():
     try:
-        # Obter a URL do banco de dados das variáveis de ambiente
-        database_url = os.environ.get('DATABASE_URL')
+        # Usar a URL do banco de dados correta diretamente
+        database_url = DATABASE_URL
         
         # Analisar a URL do banco de dados
         from urllib.parse import urlparse, unquote

@@ -20,7 +20,8 @@ app = Flask(__name__)
 
 # Configurações
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'chave_secreta_temporaria')
-app.config['DATABASE_URL'] = os.environ.get('DATABASE_URL')
+# Usar a URL do banco de dados correta diretamente
+app.config['DATABASE_URL'] = "postgresql://postgres:Am461271%40am461271@db.guqrxjjrpmfbeftwmokz.supabase.co:5432/postgres"
 
 # Configuração do Flask-Login
 login_manager = LoginManager()
