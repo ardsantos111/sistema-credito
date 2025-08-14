@@ -41,39 +41,131 @@ def load_user(user_id):
 
 def get_db_connection():
     try:
-        # Usar a URL do banco de dados correta diretamente
-        database_url = app.config['DATABASE_URL']
+        # Primeiro tentar usar variáveis de ambiente individuais (preferencialmente connection pooling)
+        db_host = os.environ.get('DB_HOST')
+        db_port = os.environ.get('DB_PORT')
+        db_name = os.environ.get('DB_NAME')
+        db_user = os.environ.get('DB_USER', 'postgres')
+        db_password = os.environ.get('DB_PASSWORD')
         
-        # Remover espaços extras da URL
-        database_url = database_url.strip()
+        if db_host and db_port and db_name and db_password:
+            # Tentar conexão com connection pooling
+            try:
+                # Remover espaços e converter porta
+                clean_db_host = db_host.strip()
+                clean_db_port = int(db_port.strip())
+                clean_db_name = db_name.strip()
+                clean_db_user = db_user.strip()
+                clean_db_password = db_password.strip()
+                
+                print(f"Tentando conexão com connection pooling:")
+                print(f"  Host: {clean_db_host}")
+                print(f"  Port: {clean_db_port}")
+                print(f"  Database: {clean_db_name}")
+                print(f"  User: {clean_db_user}")
+                
+                # Criar contexto SSL
+                import ssl
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+                
+                # Conectar ao banco de dados
+                return pg8000.dbapi.connect(
+                    user=clean_db_user,
+                    password=clean_db_password,
+                    host=clean_db_host,
+                    port=clean_db_port,
+                    database=clean_db_name,
+                    timeout=30,
+                    ssl_context=ssl_context
+                )
+            except Exception as pool_error:
+                print(f"Falha na conexão com connection pooling: {str(pool_error)}")
+                # Tentar fallback para DATABASE_URL
         
-        # Analisar a URL do banco de dados
-        url = urlparse(database_url)
+        # Fallback: Usar DATABASE_URL se disponível
+        database_url = app.config.get('DATABASE_URL') or os.environ.get('DATABASE_URL')
+        if database_url:
+            try:
+                # Remover espaços extras da URL
+                database_url = database_url.strip()
+                # Corrigir problemas comuns na URL
+                database_url = database_url.replace(' ', '')  # Remover todos os espaços
+                
+                # Analisar a URL do banco de dados
+                url = urlparse(database_url)
+                
+                # Decodificar a senha para lidar com caracteres especiais
+                decoded_password = unquote(url.password) if url.password else None
+                
+                # Garantir que a porta seja um inteiro
+                port = url.port
+                if isinstance(port, str):
+                    port = int(port.strip())
+                
+                print(f"Tentando conexão com DATABASE_URL:")
+                print(f"  Host: {url.hostname}")
+                print(f"  Port: {port}")
+                print(f"  Database: {url.path[1:]}")
+                print(f"  User: {url.username}")
+                
+                # Criar contexto SSL
+                import ssl
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+                
+                # Conectar ao banco de dados
+                return pg8000.dbapi.connect(
+                    user=url.username,
+                    password=decoded_password,
+                    host=url.hostname,
+                    port=port,
+                    database=url.path[1:],
+                    timeout=30,
+                    ssl_context=ssl_context
+                )
+            except Exception as url_error:
+                print(f"Falha na conexão com DATABASE_URL: {str(url_error)}")
         
-        # Decodificar a senha para lidar com caracteres especiais
-        decoded_password = unquote(url.password) if url.password else None
+        # Se nada funcionar, tentar conexão hardcoded (último recurso)
+        try:
+            hardcoded_url = "postgresql://postgres:Am461271%40am461271@db.guqrxjjrpmfbeftwmokz.supabase.co:5432/postgres"
+            hardcoded_url = hardcoded_url.strip().replace(' ', '')
+            url = urlparse(hardcoded_url)
+            decoded_password = unquote(url.password) if url.password else None
+            port = url.port
+            if isinstance(port, str):
+                port = int(port.strip())
+            
+            print(f"Tentando conexão hardcoded:")
+            print(f"  Host: {url.hostname}")
+            print(f"  Port: {port}")
+            print(f"  Database: {url.path[1:]}")
+            print(f"  User: {url.username}")
+            
+            # Criar contexto SSL
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            # Conectar ao banco de dados
+            return pg8000.dbapi.connect(
+                user=url.username,
+                password=decoded_password,
+                host=url.hostname,
+                port=port,
+                database=url.path[1:],
+                timeout=30,
+                ssl_context=ssl_context
+            )
+        except Exception as hardcode_error:
+            print(f"Falha na conexão hardcoded: {str(hardcode_error)}")
         
-        # Garantir que a porta seja um inteiro
-        port = url.port
-        if isinstance(port, str):
-            port = int(port.strip())
+        return None
         
-        # Criar contexto SSL
-        import ssl
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        
-        # Conectar ao banco de dados
-        return pg8000.dbapi.connect(
-            user=url.username,
-            password=decoded_password,
-            host=url.hostname,
-            port=port,
-            database=url.path[1:],
-            timeout=30,
-            ssl_context=ssl_context
-        )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
         import traceback
