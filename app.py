@@ -364,43 +364,39 @@ def diagnostic():
             "flask_login": {}
         }
         
-        # Testar variáveis de ambiente
-        result["environment"]["secret_key_defined"] = bool(os.environ.get('SECRET_KEY'))
-        result["environment"]["database_url_defined"] = bool(os.environ.get('DATABASE_URL'))
+        # Testar variáveis de ambiente individuais primeiro
+        db_host = os.environ.get('DB_HOST')
+        db_port = os.environ.get('DB_PORT')
+        db_name = os.environ.get('DB_NAME')
+        db_user = os.environ.get('DB_USER', 'postgres')
+        db_password = os.environ.get('DB_PASSWORD')
         
+        result["environment"]["db_host_defined"] = bool(db_host)
+        result["environment"]["db_port_defined"] = bool(db_port)
+        result["environment"]["db_name_defined"] = bool(db_name)
+        result["environment"]["db_user_defined"] = bool(db_user)
+        result["environment"]["db_password_defined"] = bool(db_password)
+        
+        # Testar variável DATABASE_URL composta
         database_url = os.environ.get('DATABASE_URL')
-        if database_url:
-            try:
-                # Remover espaços extras da URL
-                database_url = database_url.strip()
-                url = urlparse(database_url)
-                result["environment"]["database_host"] = url.hostname
-                result["environment"]["database_port"] = url.port
-                result["environment"]["database_name"] = url.path[1:] if url.path else 'N/A'
-                result["environment"]["database_user"] = url.username
-            except Exception as e:
-                result["environment"]["database_url_error"] = str(e)
+        result["environment"]["database_url_defined"] = bool(database_url)
         
-        # Testar Flask-Login
-        try:
-            from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-            result["flask_login"]["import_success"] = True
-        except Exception as e:
-            result["flask_login"]["import_success"] = False
-            result["flask_login"]["error"] = str(e)
-        
-        # Testar conexão com o banco de dados
-        if database_url:
+        # Se tivermos as variáveis individuais, usá-las
+        if db_host and db_port and db_name and db_password:
             try:
-                # Remover espaços extras da URL
-                database_url = database_url.strip()
-                url = urlparse(database_url)
-                decoded_password = unquote(url.password) if url.password else None
+                # Montar URL manualmente sem espaços
+                clean_db_port = db_port.strip().replace(' ', '')
+                clean_db_host = db_host.strip().replace(' ', '')
+                clean_db_name = db_name.strip().replace(' ', '')
+                clean_db_password = db_password.strip().replace(' ', '')
+                clean_db_user = db_user.strip().replace(' ', '') if db_user else 'postgres'
                 
-                # Garantir que a porta seja um inteiro
-                port = url.port
-                if isinstance(port, str):
-                    port = int(port.strip())
+                result["environment"]["constructed_url"] = f"postgresql://{clean_db_user}:***@{clean_db_host}:{clean_db_port}/{clean_db_name}"
+                result["environment"]["clean_db_port"] = clean_db_port
+                result["environment"]["clean_db_host"] = clean_db_host
+                
+                # Converter porta para inteiro
+                port_int = int(clean_db_port)
                 
                 # Criar contexto SSL
                 import ssl
@@ -409,16 +405,17 @@ def diagnostic():
                 ssl_context.verify_mode = ssl.CERT_NONE
                 
                 conn = pg8000.dbapi.connect(
-                    user=url.username,
-                    password=decoded_password,
-                    host=url.hostname,
-                    port=port,
-                    database=url.path[1:],
+                    user=clean_db_user,
+                    password=clean_db_password,
+                    host=clean_db_host,
+                    port=port_int,
+                    database=clean_db_name,
                     timeout=30,
                     ssl_context=ssl_context
                 )
                 
                 result["database"]["connection_success"] = True
+                result["database"]["method"] = "individual_env_vars"
                 
                 cur = conn.cursor()
                 
@@ -457,6 +454,96 @@ def diagnostic():
                 result["database"]["error"] = str(e)
                 import traceback
                 result["database"]["traceback"] = traceback.format_exc()
+                result["database"]["method"] = "individual_env_vars"
+        elif database_url:
+            # Usar a URL composta se não tivermos as variáveis individuais
+            try:
+                # Remover espaços extras da URL de forma mais robusta
+                database_url = database_url.strip()
+                # Corrigir problemas comuns na URL
+                database_url = database_url.replace(' ', '')  # Remover todos os espaços
+                
+                url = urlparse(database_url)
+                decoded_password = unquote(url.password) if url.password else None
+                
+                # Garantir que a porta seja um inteiro
+                port = url.port
+                if isinstance(port, str):
+                    port = int(port.strip())
+                
+                # Criar contexto SSL
+                import ssl
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+                
+                conn = pg8000.dbapi.connect(
+                    user=url.username,
+                    password=decoded_password,
+                    host=url.hostname,
+                    port=port,
+                    database=url.path[1:],
+                    timeout=30,
+                    ssl_context=ssl_context
+                )
+                
+                result["database"]["connection_success"] = True
+                result["database"]["method"] = "database_url"
+                
+                cur = conn.cursor()
+                
+                # Verificar usuário master
+                cur.execute("SELECT id, email, role, ativo FROM app_users WHERE email = %s", ("master@sistema.com",))
+                user_data = cur.fetchone()
+                
+                if user_data:
+                    result["database"]["master_user"] = {
+                        "found": True,
+                        "id": user_data[0],
+                        "email": user_data[1],
+                        "role": user_data[2],
+                        "ativo": user_data[3]
+                    }
+                else:
+                    result["database"]["master_user"] = {"found": False}
+                    
+                    # Listar todos os usuários
+                    cur.execute("SELECT id, email, role, ativo FROM app_users ORDER BY id")
+                    all_users = cur.fetchall()
+                    result["database"]["all_users"] = []
+                    for user in all_users:
+                        result["database"]["all_users"].append({
+                            "id": user[0],
+                            "email": user[1],
+                            "role": user[2],
+                            "ativo": user[3]
+                        })
+                
+                cur.close()
+                conn.close()
+                
+            except Exception as e:
+                result["database"]["connection_success"] = False
+                result["database"]["error"] = str(e)
+                import traceback
+                result["database"]["traceback"] = traceback.format_exc()
+                result["database"]["method"] = "database_url"
+                result["database"]["debug_info"] = {
+                    "database_url_length": len(database_url) if database_url else 0,
+                    "database_url_sample": database_url[:100] if database_url else "None"
+                }
+        else:
+            result["database"]["connection_success"] = False
+            result["database"]["error"] = "Nenhuma informação de conexão disponível"
+            result["database"]["method"] = "none"
+        
+        # Testar Flask-Login
+        try:
+            from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+            result["flask_login"]["import_success"] = True
+        except Exception as e:
+            result["flask_login"]["import_success"] = False
+            result["flask_login"]["error"] = str(e)
         
         return jsonify(result)
         
