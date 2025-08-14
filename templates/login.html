@@ -14,12 +14,14 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--font-family-sans);
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-normal);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: var(--spacer-lg);
             transition: background 0.3s ease;
         }
         
@@ -32,7 +34,7 @@
         }
         
         .login-container {
-            border-radius: 10px;
+            border-radius: var(--radiusLarge);
             overflow: hidden;
             width: 100%;
             max-width: 400px;
@@ -50,7 +52,7 @@
         }
         
         .login-header {
-            padding: 30px 20px;
+            padding: var(--spacer-2xl) var(--spacer-lg);
             text-align: center;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
@@ -66,28 +68,28 @@
         }
         
         .login-header h1 {
-            font-size: 24px;
-            font-weight: 300;
-            margin-bottom: 5px;
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-light);
+            margin-bottom: var(--spacer-xs);
         }
         
         .login-header p {
-            font-size: 14px;
+            font-size: var(--font-size-sm);
             opacity: 0.9;
         }
         
         .login-form {
-            padding: 30px;
+            padding: var(--spacer-2xl);
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: var(--spacer-lg);
         }
         
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
+            margin-bottom: var(--spacer-xs);
+            font-weight: var(--font-weight-medium);
             transition: color 0.3s ease;
         }
         
@@ -105,7 +107,7 @@
         
         .form-group .input-group i {
             position: absolute;
-            left: 12px;
+            left: var(--spacer-sm);
             top: 50%;
             transform: translateY(-50%);
             transition: color 0.3s ease;
@@ -121,9 +123,10 @@
         
         .form-group input {
             width: 100%;
-            padding: 12px 12px 12px 40px;
-            border-radius: 5px;
-            font-size: 16px;
+            padding: var(--spacer-sm) var(--spacer-sm) var(--spacer-sm) var(--spacer-xl);
+            border-radius: var(--radiusSmall);
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-normal);
             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
         }
         
@@ -153,11 +156,11 @@
         
         .btn-login {
             width: 100%;
-            padding: 12px;
+            padding: var(--spacer-sm);
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: var(--radiusSmall);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-medium);
             cursor: pointer;
             transition: background 0.3s, color 0.3s;
         }
@@ -181,10 +184,10 @@
         }
         
         .alert {
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            font-size: 14px;
+            padding: var(--spacer-sm) var(--spacer-base);
+            margin-bottom: var(--spacer-lg);
+            border-radius: var(--radiusSmall);
+            font-size: var(--font-size-sm);
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
     </style>

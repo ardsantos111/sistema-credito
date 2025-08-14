@@ -77,18 +77,19 @@
 {% block extra_css %}
 <style>
     .filter-section {
-        margin-bottom: 2em;
+        margin-bottom: var(--spacer-2xl);
         display: flex;
         justify-content: flex-end;
-        gap: 1em;
+        gap: var(--spacer-base);
         align-items: center;
         flex-wrap: wrap;
     }
     
     .filter-section input, .filter-section select {
-        padding: 8px;
-        border-radius: 5px;
+        padding: var(--spacer-xs) var(--spacer-sm);
+        border-radius: var(--radiusSmall);
         transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        font-size: var(--font-size-base);
     }
     
     body[data-theme="light"] .filter-section input, 
@@ -106,10 +107,12 @@
     }
     
     .filter-section button {
-        padding: 8px 12px;
+        padding: var(--spacer-xs) var(--spacer-base);
         cursor: pointer;
-        border-radius: 5px;
+        border-radius: var(--radiusSmall);
         transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-medium);
     }
     
     body[data-theme="light"] .filter-section button {
@@ -135,10 +138,10 @@
     }
     
     .status-badge {
-        padding: 5px 10px;
+        padding: var(--spacer-xs) var(--spacer-sm);
         border-radius: 12px;
-        font-weight: bold;
-        font-size: 0.8em;
+        font-weight: var(--font-weight-bold);
+        font-size: var(--font-size-xs);
         display: inline-block;
         transition: background-color 0.3s ease, color 0.3s ease;
     }
@@ -174,29 +177,33 @@
     }
     
     .pagamentos-table-container {
-        margin-top: 2em;
+        margin-top: var(--spacer-2xl);
     }
     
     body[data-theme="light"] h2 {
         color: #333;
+        font-weight: var(--font-weight-semibold);
     }
     
     body[data-theme="dark"] h2 {
         color: #e0e0e0;
+        font-weight: var(--font-weight-semibold);
     }
     
     body[data-theme="light"] h1 {
         color: #333;
+        font-weight: var(--font-weight-semibold);
     }
     
     body[data-theme="dark"] h1 {
         color: #e0e0e0;
+        font-weight: var(--font-weight-semibold);
     }
     
     .btn-small {
-        padding: 5px 10px;
-        font-size: 0.875rem;
-        border-radius: 0.2rem;
+        padding: var(--spacer-xs) var(--spacer-sm);
+        font-size: var(--font-size-sm);
+        border-radius: var(--radiusSmall);
     }
 </style>
 {% endblock %}

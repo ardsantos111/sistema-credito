@@ -5,9 +5,9 @@
 
 {% block content %}
 <div class="container">
-    <p>Olá, {{ current_user.email.split('@')[0] | title }}! Bem-vindo(a)!</p>
-    <p>Você pode acessar a página de entrada de vendas aqui:</p>
-    <a href="{{ url_for('vendas') }}" class="btn btn-primary">Ir para a Entrada de Vendas</a>
+    <p class="mb-3">Olá, {{ current_user.email.split('@')[0] | title }}! Bem-vindo(a)!</p>
+    <p class="mb-4">Você pode acessar a página de entrada de vendas aqui:</p>
+    <a href="{{ url_for('vendas') }}" class="btn btn-primary mb-4">Ir para a Entrada de Vendas</a>
     
     <div class="table-container">
         <h2>Pagamentos Vencidos</h2>
@@ -31,7 +31,7 @@
                 </tbody>
             </table>
         {% else %}
-            <p>Nenhum pagamento vencido no momento.</p>
+            <p class="mb-4">Nenhum pagamento vencido no momento.</p>
         {% endif %}
     </div>
     
@@ -57,7 +57,7 @@
                 </tbody>
             </table>
         {% else %}
-            <p>Nenhum pagamento a vencer neste mês.</p>
+            <p class="mb-4">Nenhum pagamento a vencer neste mês.</p>
         {% endif %}
     </div>
 </div>
@@ -66,17 +66,18 @@
 {% block extra_css %}
 <style>
     .table-container { 
-        margin-top: 2em; 
+        margin-top: var(--spacer-2xl); 
     }
     
     table { 
         width: 100%; 
         border-collapse: collapse; 
         transition: background-color 0.3s ease, color 0.3s ease;
+        font-size: var(--font-size-base);
     }
     
     th, td { 
-        padding: 0.75em; 
+        padding: var(--spacer-sm) var(--spacer-base); 
         text-align: left; 
         transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     }
@@ -102,7 +103,7 @@
     }
     
     .vencido { 
-        font-weight: bold; 
+        font-weight: var(--font-weight-bold); 
         transition: color 0.3s ease;
     }
     
@@ -115,7 +116,7 @@
     }
     
     .a-vencer { 
-        font-weight: bold; 
+        font-weight: var(--font-weight-bold); 
         transition: color 0.3s ease;
     }
     
@@ -137,10 +138,12 @@
     
     body[data-theme="light"] h2 {
         color: #333;
+        font-weight: var(--font-weight-semibold);
     }
     
     body[data-theme="dark"] h2 {
         color: #e0e0e0;
+        font-weight: var(--font-weight-semibold);
     }
 </style>
 {% endblock %}

@@ -5,8 +5,8 @@
 
 {% block content %}
 <div class="container">
-    <p>Olá, {{ current_user.email.split('@')[0] | title }}! Bem-vindo(a)!</p>
-    <p>Você pode acessar a página de entrada de vendas aqui:</p>
+    <p class="mb-3">Olá, {{ current_user.email.split('@')[0] | title }}! Bem-vindo(a)!</p>
+    <p class="mb-4">Você pode acessar a página de entrada de vendas aqui:</p>
     <a href="{{ url_for('index') }}" class="btn btn-primary">Ir para a Entrada de Vendas</a>
 </div>
 {% endblock %}

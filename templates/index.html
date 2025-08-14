@@ -111,7 +111,7 @@
 {% block extra_css %}
 <style>
     .card {
-        border-radius: 0.5rem;
+        border-radius: var(--radiusSmall);
         border: 0;
         transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     }
@@ -126,7 +126,7 @@
     }
     
     .card-header {
-        border-radius: 0.5rem 0.5rem 0 0 !important;
+        border-radius: var(--radiusSmall) var(--radiusSmall) 0 0 !important;
         transition: border-color 0.3s ease, background-color 0.3s ease;
     }
     
@@ -213,18 +213,33 @@
     
     body[data-theme="light"] .lead {
         color: #6c757d;
+        font-size: var(--font-size-lg);
+        line-height: var(--line-height-relaxed);
     }
     
     body[data-theme="dark"] .lead {
         color: #aaa;
+        font-size: var(--font-size-lg);
+        line-height: var(--line-height-relaxed);
     }
     
     body[data-theme="light"] h2 {
         color: #333;
+        font-weight: var(--font-weight-semibold);
     }
     
     body[data-theme="dark"] h2 {
         color: #e0e0e0;
+        font-weight: var(--font-weight-semibold);
+    }
+    
+    .text-xs {
+        font-size: var(--font-size-xs);
+    }
+    
+    .text-uppercase {
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
 </style>
 {% endblock %}

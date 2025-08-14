@@ -118,7 +118,7 @@
 <style>
     .form-section {
         border-radius: var(--radiusSmall);
-        padding: 20px;
+        padding: var(--spacer-lg);
         transition: background-color 0.3s ease, box-shadow 0.3s ease;
     }
     
@@ -133,7 +133,7 @@
     }
     
     .card {
-        border-radius: 0.5rem;
+        border-radius: var(--radiusSmall);
         border: 0;
         transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     }
@@ -148,7 +148,7 @@
     }
     
     .card-header {
-        border-radius: 0.5rem 0.5rem 0 0 !important;
+        border-radius: var(--radiusSmall) var(--radiusSmall) 0 0 !important;
         transition: border-color 0.3s ease;
     }
     
@@ -190,9 +190,9 @@
     }
     
     .btn {
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-        border-radius: 0.375rem;
+        padding: var(--spacer-sm) var(--spacer-lg);
+        font-size: var(--font-size-base);
+        border-radius: var(--radiusSmall);
         transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
     }
     
@@ -254,6 +254,7 @@
     
     .card-title {
         transition: color 0.3s ease;
+        font-weight: var(--font-weight-semibold);
     }
     
     body[data-theme="light"] .card-title {
@@ -266,6 +267,7 @@
     
     #resumo_total, #resumo_entrada, #resumo_financiado {
         transition: color 0.3s ease;
+        font-weight: var(--font-weight-bold);
     }
     
     body[data-theme="light"] #resumo_total {

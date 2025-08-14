@@ -7,7 +7,7 @@
 <style>
     .page-title {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: var(--spacer-2xl);
         transition: color 0.3s ease;
     }
     
@@ -22,13 +22,13 @@
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+        gap: var(--spacer-lg);
+        margin-bottom: var(--spacer-2xl);
     }
     
     .stat-card {
-        border-radius: 10px;
-        padding: 2rem;
+        border-radius: var(--radiusLarge);
+        padding: var(--spacer-2xl);
         text-align: center;
         transition: transform 0.3s, background-color 0.3s ease, box-shadow 0.3s ease;
     }
@@ -49,17 +49,17 @@
     
     .stat-icon {
         font-size: 3rem;
-        margin-bottom: 1rem;
+        margin-bottom: var(--spacer-base);
     }
     
     .stat-number {
         font-size: 2.5rem;
-        font-weight: bold;
-        margin: 1rem 0;
+        font-weight: var(--font-weight-bold);
+        margin: var(--spacer-base) 0;
     }
     
     .stat-label {
-        font-size: 1.1rem;
+        font-size: var(--font-size-lg);
         transition: color 0.3s ease;
     }
     
@@ -72,9 +72,9 @@
     }
     
     .management-section {
-        border-radius: 10px;
-        padding: 2rem;
-        margin-top: 2rem;
+        border-radius: var(--radiusLarge);
+        padding: var(--spacer-2xl);
+        margin-top: var(--spacer-2xl);
         transition: background-color 0.3s ease, box-shadow 0.3s ease;
     }
     
@@ -91,13 +91,13 @@
     .management-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-        margin-top: 1.5rem;
+        gap: var(--spacer-lg);
+        margin-top: var(--spacer-lg);
     }
     
     .management-card {
-        border-radius: 8px;
-        padding: 1.5rem;
+        border-radius: var(--radiusSmall);
+        padding: var(--spacer-lg);
         transition: all 0.3s, background-color 0.3s ease, border-color 0.3s ease;
     }
     
@@ -122,7 +122,7 @@
     
     .management-icon {
         font-size: 2.5rem;
-        margin-bottom: 1rem;
+        margin-bottom: var(--spacer-base);
         transition: color 0.3s ease;
     }
     
@@ -135,9 +135,9 @@
     }
     
     .management-title {
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
+        font-size: var(--font-size-xl);
+        font-weight: var(--font-weight-bold);
+        margin-bottom: var(--spacer-xs);
         transition: color 0.3s ease;
     }
     
@@ -150,8 +150,8 @@
     }
     
     .management-description {
-        margin-bottom: 1rem;
-        line-height: 1.5;
+        margin-bottom: var(--spacer-base);
+        line-height: var(--line-height-relaxed);
         transition: color 0.3s ease;
     }
     
@@ -164,8 +164,8 @@
     }
     
     .btn-primary {
-        padding: 0.5rem 1rem;
-        border-radius: 5px;
+        padding: var(--spacer-xs) var(--spacer-base);
+        border-radius: var(--radiusSmall);
         cursor: pointer;
         text-decoration: none;
         display: inline-block;
@@ -239,7 +239,7 @@
     
     <div class="management-section">
         <h2><i class="fas fa-cogs"></i> Gestão do Sistema</h2>
-        <p>Gerencie todas as empresas e recursos do sistema:</p>
+        <p class="mb-4">Gerencie todas as empresas e recursos do sistema:</p>
         
         <div class="management-grid">
             <div class="management-card">

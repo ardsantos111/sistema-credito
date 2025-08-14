@@ -7,7 +7,9 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: var(--font-family-sans);
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-normal);
             margin: 0;
             padding: 0;
             display: flex;
@@ -27,8 +29,8 @@
 
         .container {
             text-align: center;
-            border-radius: 8px;
-            padding: 40px;
+            border-radius: var(--radiusSmall);
+            padding: var(--spacer-3xl);
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
@@ -43,9 +45,10 @@
         }
 
         h1 {
-            font-size: 3em;
-            margin-bottom: 20px;
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacer-lg);
             transition: color 0.3s ease;
+            font-weight: var(--font-weight-bold);
         }
 
         body[data-theme="light"] h1 {
@@ -57,8 +60,8 @@
         }
 
         p {
-            font-size: 1.2em;
-            margin-bottom: 30px;
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--spacer-2xl);
             transition: color 0.3s ease;
         }
 
@@ -72,10 +75,10 @@
 
         a {
             display: inline-block;
-            padding: 12px 24px;
+            padding: var(--spacer-sm) var(--spacer-lg);
             text-decoration: none;
-            border-radius: 4px;
-            font-weight: bold;
+            border-radius: var(--radiusSmall);
+            font-weight: var(--font-weight-bold);
             transition: background-color 0.3s, color 0.3s;
         }
 
