@@ -456,6 +456,10 @@ def diagnostic():
             "flask_login": {}
         }
         
+        # Debug: Mostrar todas as variáveis de ambiente (apenas nomes, não valores)
+        env_vars = list(os.environ.keys())
+        result["environment"]["all_env_vars"] = [var for var in env_vars if 'DB_' in var or 'SECRET_' in var or 'DATABASE_' in var]
+        
         # Testar variáveis de ambiente individuais primeiro
         db_host = os.environ.get('DB_HOST')
         db_port = os.environ.get('DB_PORT')
@@ -469,9 +473,23 @@ def diagnostic():
         result["environment"]["db_user_defined"] = bool(db_user)
         result["environment"]["db_password_defined"] = bool(db_password)
         
+        # Mostrar valores (sem revelar senhas)
+        if db_host:
+            result["environment"]["db_host_value"] = db_host[:10] + "..." if len(db_host) > 10 else db_host
+        if db_port:
+            result["environment"]["db_port_value"] = db_port
+        if db_name:
+            result["environment"]["db_name_value"] = db_name[:10] + "..." if len(db_name) > 10 else db_name
+        if db_user:
+            result["environment"]["db_user_value"] = db_user[:10] + "..." if len(db_user) > 10 else db_user
+        if db_password:
+            result["environment"]["db_password_defined_confirmed"] = True
+            
         # Testar variável DATABASE_URL composta
         database_url = os.environ.get('DATABASE_URL')
         result["environment"]["database_url_defined"] = bool(database_url)
+        if database_url:
+            result["environment"]["database_url_value"] = database_url[:20] + "..." if len(database_url) > 20 else database_url
         
         # Se tivermos as variáveis individuais, usá-las
         if db_host and db_port and db_name and db_password:
@@ -486,6 +504,8 @@ def diagnostic():
                 result["environment"]["constructed_url"] = f"postgresql://{clean_db_user}:***@{clean_db_host}:{clean_db_port}/{clean_db_name}"
                 result["environment"]["clean_db_port"] = clean_db_port
                 result["environment"]["clean_db_host"] = clean_db_host
+                result["environment"]["clean_db_name"] = clean_db_name
+                result["environment"]["clean_db_user"] = clean_db_user
                 
                 # Converter porta para inteiro
                 port_int = int(clean_db_port)
@@ -628,6 +648,13 @@ def diagnostic():
             result["database"]["connection_success"] = False
             result["database"]["error"] = "Nenhuma informação de conexão disponível"
             result["database"]["method"] = "none"
+            result["database"]["debug_info"] = {
+                "db_host": db_host[:20] if db_host else "None",
+                "db_port": db_port[:20] if db_port else "None",
+                "db_name": db_name[:20] if db_name else "None",
+                "db_user": db_user[:20] if db_user else "None",
+                "db_password": "Defined" if db_password else "None"
+            }
         
         # Testar Flask-Login
         try:
