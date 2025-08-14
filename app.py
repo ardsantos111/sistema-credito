@@ -44,11 +44,19 @@ def get_db_connection():
         # Usar a URL do banco de dados correta diretamente
         database_url = app.config['DATABASE_URL']
         
+        # Remover espaços extras da URL
+        database_url = database_url.strip()
+        
         # Analisar a URL do banco de dados
         url = urlparse(database_url)
         
         # Decodificar a senha para lidar com caracteres especiais
         decoded_password = unquote(url.password) if url.password else None
+        
+        # Garantir que a porta seja um inteiro
+        port = url.port
+        if isinstance(port, str):
+            port = int(port.strip())
         
         # Criar contexto SSL
         import ssl
@@ -61,13 +69,15 @@ def get_db_connection():
             user=url.username,
             password=decoded_password,
             host=url.hostname,
-            port=url.port,
+            port=port,
             database=url.path[1:],
             timeout=30,
             ssl_context=ssl_context
         )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return None
 
 @app.route('/')
