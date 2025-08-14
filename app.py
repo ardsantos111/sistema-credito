@@ -338,6 +338,113 @@ def vendas():
         print(f"[ERRO] Erro na página de vendas: {str(e)}")
         return redirect(url_for('dashboard'))
 
+@app.route('/diagnostic')
+def diagnostic():
+    """Endpoint de diagnóstico para o ambiente Vercel"""
+    try:
+        import os
+        import json
+        from urllib.parse import urlparse, unquote
+        import pg8000.dbapi
+        from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+        
+        result = {
+            "environment": {},
+            "database": {},
+            "flask_login": {}
+        }
+        
+        # Testar variáveis de ambiente
+        result["environment"]["secret_key_defined"] = bool(os.environ.get('SECRET_KEY'))
+        result["environment"]["database_url_defined"] = bool(os.environ.get('DATABASE_URL'))
+        
+        database_url = os.environ.get('DATABASE_URL')
+        if database_url:
+            try:
+                url = urlparse(database_url)
+                result["environment"]["database_host"] = url.hostname
+                result["environment"]["database_port"] = url.port
+                result["environment"]["database_name"] = url.path[1:] if url.path else 'N/A'
+                result["environment"]["database_user"] = url.username
+            except Exception as e:
+                result["environment"]["database_url_error"] = str(e)
+        
+        # Testar Flask-Login
+        try:
+            from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+            result["flask_login"]["import_success"] = True
+        except Exception as e:
+            result["flask_login"]["import_success"] = False
+            result["flask_login"]["error"] = str(e)
+        
+        # Testar conexão com o banco de dados
+        if database_url:
+            try:
+                url = urlparse(database_url)
+                decoded_password = unquote(url.password) if url.password else None
+                
+                # Criar contexto SSL
+                import ssl
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+                
+                conn = pg8000.dbapi.connect(
+                    user=url.username,
+                    password=decoded_password,
+                    host=url.hostname,
+                    port=url.port,
+                    database=url.path[1:],
+                    timeout=30,
+                    ssl_context=ssl_context
+                )
+                
+                result["database"]["connection_success"] = True
+                
+                cur = conn.cursor()
+                
+                # Verificar usuário master
+                cur.execute("SELECT id, email, role, ativo FROM app_users WHERE email = %s", ("master@sistema.com",))
+                user_data = cur.fetchone()
+                
+                if user_data:
+                    result["database"]["master_user"] = {
+                        "found": True,
+                        "id": user_data[0],
+                        "email": user_data[1],
+                        "role": user_data[2],
+                        "ativo": user_data[3]
+                    }
+                else:
+                    result["database"]["master_user"] = {"found": False}
+                    
+                    # Listar todos os usuários
+                    cur.execute("SELECT id, email, role, ativo FROM app_users ORDER BY id")
+                    all_users = cur.fetchall()
+                    result["database"]["all_users"] = []
+                    for user in all_users:
+                        result["database"]["all_users"].append({
+                            "id": user[0],
+                            "email": user[1],
+                            "role": user[2],
+                            "ativo": user[3]
+                        })
+                
+                cur.close()
+                conn.close()
+                
+            except Exception as e:
+                result["database"]["connection_success"] = False
+                result["database"]["error"] = str(e)
+                import traceback
+                result["database"]["traceback"] = traceback.format_exc()
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({"error": str(e), "type": type(e).__name__}), 500
+
+
 @app.route('/gerar_contrato/<int:venda_id>')
 @login_required
 def gerar_contrato(venda_id):
