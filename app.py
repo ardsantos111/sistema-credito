@@ -371,6 +371,8 @@ def diagnostic():
         database_url = os.environ.get('DATABASE_URL')
         if database_url:
             try:
+                # Remover espaços extras da URL
+                database_url = database_url.strip()
                 url = urlparse(database_url)
                 result["environment"]["database_host"] = url.hostname
                 result["environment"]["database_port"] = url.port
@@ -390,8 +392,15 @@ def diagnostic():
         # Testar conexão com o banco de dados
         if database_url:
             try:
+                # Remover espaços extras da URL
+                database_url = database_url.strip()
                 url = urlparse(database_url)
                 decoded_password = unquote(url.password) if url.password else None
+                
+                # Garantir que a porta seja um inteiro
+                port = url.port
+                if isinstance(port, str):
+                    port = int(port.strip())
                 
                 # Criar contexto SSL
                 import ssl
@@ -403,7 +412,7 @@ def diagnostic():
                     user=url.username,
                     password=decoded_password,
                     host=url.hostname,
-                    port=url.port,
+                    port=port,
                     database=url.path[1:],
                     timeout=30,
                     ssl_context=ssl_context
