@@ -1,80 +1,146 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Painel do Usuário</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .table-container { margin-top: 2em; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ccc; padding: 0.75em; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .vencido { color: #dc3545; font-weight: bold; } /* Vermelho para vencido */
-        .a-vencer { color: #ffc107; font-weight: bold; } /* Amarelo para a vencer */
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Painel do Usuário</h1>
-            <a href="{{ url_for('logout') }}" class="btn-logout">Sair</a>
-        </header>
+{% extends "base.html" %}
 
-        <p>Olá, {{ current_user.username }}! Bem-vindo(a)!</p>
-        <p>Você pode acessar a página de entrada de vendas aqui:</p>
-        <a href="{{ url_for('vendas') }}" class="btn-add-sale">Ir para a Entrada de Vendas</a>
-        
-        <div class="table-container">
-            <h2>Pagamentos Vencidos</h2>
-            {% if vencidos %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Valor</th>
-                            <th>Vencimento</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for pagamento in vencidos %}
-                        <tr class="vencido">
-                            <td>{{ pagamento[0] }}</td>
-                            <td>R$ {{ "%.2f"|format(pagamento[1]) }}</td>
-                            <td>{{ pagamento[2] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Nenhum pagamento vencido no momento.</p>
-            {% endif %}
-        </div>
-        
-        <div class="table-container">
-            <h2>Pagamentos a Vencer neste Mês</h2>
-            {% if a_vencer_mes %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Valor</th>
-                            <th>Vencimento</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for pagamento in a_vencer_mes %}
-                        <tr class="a-vencer">
-                            <td>{{ pagamento[0] }}</td>
-                            <td>R$ {{ "%.2f"|format(pagamento[1]) }}</td>
-                            <td>{{ pagamento[2] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Nenhum pagamento a vencer neste mês.</p>
-            {% endif %}
-        </div>
+{% block title %}Painel do Usuário - OC CDC{% endblock %}
+{% block page_title %}Painel do Usuário{% endblock %}
+
+{% block content %}
+<div class="container">
+    <p>Olá, {{ current_user.email.split('@')[0] | title }}! Bem-vindo(a)!</p>
+    <p>Você pode acessar a página de entrada de vendas aqui:</p>
+    <a href="{{ url_for('vendas') }}" class="btn btn-primary">Ir para a Entrada de Vendas</a>
+    
+    <div class="table-container">
+        <h2>Pagamentos Vencidos</h2>
+        {% if vencidos %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Valor</th>
+                        <th>Vencimento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pagamento in vencidos %}
+                    <tr class="vencido">
+                        <td>{{ pagamento[0] }}</td>
+                        <td>R$ {{ "%.2f"|format(pagamento[1]) }}</td>
+                        <td>{{ pagamento[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Nenhum pagamento vencido no momento.</p>
+        {% endif %}
     </div>
-</body>
-</html>
+    
+    <div class="table-container">
+        <h2>Pagamentos a Vencer neste Mês</h2>
+        {% if a_vencer_mes %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Valor</th>
+                        <th>Vencimento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pagamento in a_vencer_mes %}
+                    <tr class="a-vencer">
+                        <td>{{ pagamento[0] }}</td>
+                        <td>R$ {{ "%.2f"|format(pagamento[1]) }}</td>
+                        <td>{{ pagamento[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Nenhum pagamento a vencer neste mês.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-container { 
+        margin-top: 2em; 
+    }
+    
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    th, td { 
+        padding: 0.75em; 
+        text-align: left; 
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    body[data-theme="light"] th {
+        background-color: #f2f2f2;
+        border: 1px solid #ccc;
+    }
+    
+    body[data-theme="dark"] th {
+        background-color: #2d2d2d;
+        border: 1px solid #444;
+        color: #e0e0e0;
+    }
+    
+    body[data-theme="light"] td {
+        border: 1px solid #ccc;
+    }
+    
+    body[data-theme="dark"] td {
+        border: 1px solid #444;
+        color: #e0e0e0;
+    }
+    
+    .vencido { 
+        font-weight: bold; 
+        transition: color 0.3s ease;
+    }
+    
+    body[data-theme="light"] .vencido { 
+        color: #dc3545; /* Vermelho para vencido */
+    }
+    
+    body[data-theme="dark"] .vencido { 
+        color: #ff6b6b; /* Vermelho mais claro para tema escuro */
+    }
+    
+    .a-vencer { 
+        font-weight: bold; 
+        transition: color 0.3s ease;
+    }
+    
+    body[data-theme="light"] .a-vencer { 
+        color: #ffc107; /* Amarelo para a vencer */
+    }
+    
+    body[data-theme="dark"] .a-vencer { 
+        color: #ffd54f; /* Amarelo mais claro para tema escuro */
+    }
+    
+    body[data-theme="light"] p {
+        color: #333;
+    }
+    
+    body[data-theme="dark"] p {
+        color: #e0e0e0;
+    }
+    
+    body[data-theme="light"] h2 {
+        color: #333;
+    }
+    
+    body[data-theme="dark"] h2 {
+        color: #e0e0e0;
+    }
+</style>
+{% endblock %}

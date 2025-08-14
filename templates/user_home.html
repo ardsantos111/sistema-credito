@@ -1,19 +1,24 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Página de Usuário</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <div class="container">
-        <header style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Página de Usuário</h1>
-            <a href="{{ url_for('logout') }}" class="btn-logout">Sair</a>
-        </header>
-        <p>Olá, {{ current_user.username }}! Bem-vindo(a)!</p>
-        <p>Você pode acessar a página de entrada de vendas aqui:</p>
-        <a href="{{ url_for('index') }}" class="btn-add-sale">Ir para a Entrada de Vendas</a>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Página de Usuário - OC CDC{% endblock %}
+{% block page_title %}Página de Usuário{% endblock %}
+
+{% block content %}
+<div class="container">
+    <p>Olá, {{ current_user.email.split('@')[0] | title }}! Bem-vindo(a)!</p>
+    <p>Você pode acessar a página de entrada de vendas aqui:</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">Ir para a Entrada de Vendas</a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body[data-theme="light"] p {
+        color: #333;
+    }
+    
+    body[data-theme="dark"] p {
+        color: #e0e0e0;
+    }
+</style>
+{% endblock %}

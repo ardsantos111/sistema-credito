@@ -106,17 +106,37 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_css %}
 <style>
     .card {
         border-radius: 0.5rem;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         border: 0;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    
+    body[data-theme="light"] .card {
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    
+    body[data-theme="dark"] .card {
+        background-color: #1e1e1e;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 0, 0, 0.3);
     }
     
     .card-header {
         border-radius: 0.5rem 0.5rem 0 0 !important;
+        transition: border-color 0.3s ease, background-color 0.3s ease;
+    }
+    
+    body[data-theme="light"] .card-header {
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    body[data-theme="dark"] .card-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: #2d2d2d;
     }
     
     .border-left-primary {
@@ -133,6 +153,78 @@
     
     .border-left-warning {
         border-left: 0.25rem solid var(--warning) !important;
+    }
+    
+    body[data-theme="light"] .text-gray-800 {
+        color: #333 !important;
+    }
+    
+    body[data-theme="dark"] .text-gray-800 {
+        color: #e0e0e0 !important;
+    }
+    
+    body[data-theme="light"] .text-gray-300 {
+        color: #dee2e6 !important;
+    }
+    
+    body[data-theme="dark"] .text-gray-300 {
+        color: #4d4d4d !important;
+    }
+    
+    body[data-theme="light"] .text-primary {
+        color: var(--primary) !important;
+    }
+    
+    body[data-theme="dark"] .text-primary {
+        color: #66b3ff !important;
+    }
+    
+    body[data-theme="light"] .text-success {
+        color: var(--success) !important;
+    }
+    
+    body[data-theme="dark"] .text-success {
+        color: #4caf50 !important;
+    }
+    
+    body[data-theme="light"] .text-info {
+        color: var(--info) !important;
+    }
+    
+    body[data-theme="dark"] .text-info {
+        color: #29b6f6 !important;
+    }
+    
+    body[data-theme="light"] .text-warning {
+        color: var(--warning) !important;
+    }
+    
+    body[data-theme="dark"] .text-warning {
+        color: #ff9800 !important;
+    }
+    
+    body[data-theme="light"] .text-uppercase {
+        color: var(--primary) !important;
+    }
+    
+    body[data-theme="dark"] .text-uppercase {
+        color: #66b3ff !important;
+    }
+    
+    body[data-theme="light"] .lead {
+        color: #6c757d;
+    }
+    
+    body[data-theme="dark"] .lead {
+        color: #aaa;
+    }
+    
+    body[data-theme="light"] h2 {
+        color: #333;
+    }
+    
+    body[data-theme="dark"] h2 {
+        color: #e0e0e0;
     }
 </style>
 {% endblock %}

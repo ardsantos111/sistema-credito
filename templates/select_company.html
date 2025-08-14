@@ -67,18 +67,35 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_css %}
 <style>
     .card {
         border-radius: 0.5rem;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         border: 0;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    body[data-theme="light"] .card {
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    
+    body[data-theme="dark"] .card {
+        background-color: #1e1e1e;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 0, 0, 0.3);
     }
     
     .card:hover {
         transform: translateY(-2px);
+    }
+    
+    body[data-theme="light"] .card:hover {
         box-shadow: 0 0.25rem 2rem 0 rgba(58, 59, 69, 0.25);
+    }
+    
+    body[data-theme="dark"] .card:hover {
+        box-shadow: 0 0.25rem 2rem 0 rgba(0, 0, 0, 0.4);
     }
     
     .border-left-primary {
@@ -91,6 +108,66 @@
     
     .border-left-warning {
         border-left: 0.25rem solid var(--warning) !important;
+    }
+    
+    .text-muted {
+        transition: color 0.3s ease;
+    }
+    
+    body[data-theme="light"] .text-muted {
+        color: #6c757d !important;
+    }
+    
+    body[data-theme="dark"] .text-muted {
+        color: #aaa !important;
+    }
+    
+    .badge {
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    body[data-theme="light"] .badge-success {
+        background-color: #28a745;
+        color: #fff;
+    }
+    
+    body[data-theme="dark"] .badge-success {
+        background-color: #2d5a2d;
+        color: #d4edda;
+    }
+    
+    body[data-theme="light"] .badge-secondary {
+        background-color: #6c757d;
+        color: #fff;
+    }
+    
+    body[data-theme="dark"] .badge-secondary {
+        background-color: #4d4d4d;
+        color: #e0e0e0;
+    }
+    
+    body[data-theme="light"] .text-gray-800 {
+        color: #333 !important;
+    }
+    
+    body[data-theme="dark"] .text-gray-800 {
+        color: #e0e0e0 !important;
+    }
+    
+    body[data-theme="light"] .text-primary {
+        color: var(--primary) !important;
+    }
+    
+    body[data-theme="dark"] .text-primary {
+        color: #66b3ff !important;
+    }
+    
+    body[data-theme="light"] .text-uppercase {
+        color: var(--primary) !important;
+    }
+    
+    body[data-theme="dark"] .text-uppercase {
+        color: #66b3ff !important;
     }
 </style>
 {% endblock %}

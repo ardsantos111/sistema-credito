@@ -8,56 +8,112 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body[data-theme="light"] {
+            background-color: #f4f4f4;
+        }
+
+        body[data-theme="dark"] {
+            background-color: #121212;
         }
 
         .container {
             text-align: center;
-            background-color: #fff;
-            padding: 40px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
+            padding: 40px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body[data-theme="light"] .container {
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        body[data-theme="dark"] .container {
+            background-color: #1e1e1e;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
         h1 {
-            color: #e74c3c;
             font-size: 3em;
             margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+
+        body[data-theme="light"] h1 {
+            color: #e74c3c;
+        }
+
+        body[data-theme="dark"] h1 {
+            color: #ff6b6b;
         }
 
         p {
             font-size: 1.2em;
-            color: #333;
             margin-bottom: 30px;
+            transition: color 0.3s ease;
+        }
+
+        body[data-theme="light"] p {
+            color: #333;
+        }
+
+        body[data-theme="dark"] p {
+            color: #e0e0e0;
         }
 
         a {
             display: inline-block;
             padding: 12px 24px;
-            background-color: #007bff;
-            color: white;
             text-decoration: none;
             border-radius: 4px;
             font-weight: bold;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        a:hover {
+        body[data-theme="light"] a {
+            background-color: #007bff;
+            color: white;
+        }
+
+        body[data-theme="dark"] a {
+            background-color: #2a4a8c;
+            color: #e0e0e0;
+        }
+
+        body[data-theme="light"] a:hover {
             background-color: #0056b3;
+        }
+
+        body[data-theme="dark"] a:hover {
+            background-color: #3a5a9c;
         }
     </style>
 </head>
-<body>
+<body data-theme="light">
     <div class="container">
         <h1>500</h1>
         <p>Oops! Ocorreu um erro interno no servidor.</p>
         <a href="{{ url_for('home') }}">Voltar para a página inicial</a>
     </div>
+    
+    <script>
+        // Theme Toggle Functionality for Error Pages
+        document.addEventListener('DOMContentLoaded', function() {
+            const body = document.body;
+            
+            // Verificar tema salvo no localStorage
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            body.setAttribute('data-theme', savedTheme);
+        });
+    </script>
 </body>
 </html>

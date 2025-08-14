@@ -28,7 +28,6 @@
         }
         .section h2 {
             font-size: 12pt;
-            border-bottom: 1px solid #000;
             padding-bottom: 5px;
             margin-bottom: 10px;
         }
@@ -37,12 +36,8 @@
             border-collapse: collapse;
         }
         .info-table td, .info-table th, .parcelas-table td, .parcelas-table th {
-            border: 1px solid #ccc;
             padding: 8px;
             text-align: left;
-        }
-        .info-table th, .parcelas-table th {
-            background-color: #f2f2f2;
         }
         .clausulas {
             margin-top: 20px;
@@ -63,7 +58,6 @@
             margin: 0 10px;
         }
         .linha {
-            border-bottom: 1px solid #000;
             padding-top: 50px;
             margin-bottom: 5px;
         }
@@ -73,9 +67,68 @@
         b {
             font-weight: bold;
         }
+        
+        /* Estilos para tema claro */
+        body[data-theme="light"], body:not([data-theme]) {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        
+        body[data-theme="light"] .section h2, body:not([data-theme]) .section h2 {
+            border-bottom: 1px solid #000000;
+        }
+        
+        body[data-theme="light"] .info-table td, 
+        body[data-theme="light"] .info-table th, 
+        body[data-theme="light"] .parcelas-table td, 
+        body[data-theme="light"] .parcelas-table th,
+        body:not([data-theme]) .info-table td, 
+        body:not([data-theme]) .info-table th, 
+        body:not([data-theme]) .parcelas-table td, 
+        body:not([data-theme]) .parcelas-table th {
+            border: 1px solid #cccccc;
+        }
+        
+        body[data-theme="light"] .info-table th, 
+        body[data-theme="light"] .parcelas-table th,
+        body:not([data-theme]) .info-table th, 
+        body:not([data-theme]) .parcelas-table th {
+            background-color: #f2f2f2;
+        }
+        
+        body[data-theme="light"] .linha, body:not([data-theme]) .linha {
+            border-bottom: 1px solid #000000;
+        }
+        
+        /* Estilos para tema escuro */
+        body[data-theme="dark"] {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        
+        body[data-theme="dark"] .section h2 {
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        body[data-theme="dark"] .info-table td, 
+        body[data-theme="dark"] .info-table th, 
+        body[data-theme="dark"] .parcelas-table td, 
+        body[data-theme="dark"] .parcelas-table th {
+            border: 1px solid #444444;
+        }
+        
+        body[data-theme="dark"] .info-table th, 
+        body[data-theme="dark"] .parcelas-table th {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+        }
+        
+        body[data-theme="dark"] .linha {
+            border-bottom: 1px solid #e0e0e0;
+        }
     </style>
 </head>
-<body>
+<body data-theme="light">
     <div class="header">
         <h1>CONTRATO DE COMPRA E VENDA A PRAZO</h1>
         <p>Número da Ordem de Venda: {{ ov_numero }}</p>

@@ -35,6 +35,28 @@
             --headerHeight: 60px;
         }
 
+        /* Tema claro (padrão) */
+        :root[data-theme="light"] {
+            --bg-color: #f5f7fb;
+            --text-color: #343a40;
+            --sidebar-bg: linear-gradient(180deg, #343a40, #23272b);
+            --sidebar-text: #ffffff;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
+            --border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Tema escuro */
+        :root[data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --sidebar-bg: linear-gradient(180deg, #1e1e1e, #121212);
+            --sidebar-text: #e0e0e0;
+            --header-bg: #1e1e1e;
+            --card-bg: #1e1e1e;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -43,18 +65,19 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fb;
-            color: var(--gray800);
+            background-color: var(--bg-color);
+            color: var(--text-color);
             line-height: 1.6;
             min-height: 100vh;
             display: flex;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* Sidebar */
         .sidebar {
             width: var(--sidebarWidth);
-            background: linear-gradient(180deg, var(--dark), #23272b);
-            color: var(--white);
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
             height: 100vh;
             position: fixed;
             overflow-y: auto;
@@ -72,7 +95,7 @@
             margin: 0;
             font-size: 1.4rem;
             font-weight: 600;
-            color: var(--white);
+            color: var(--sidebar-text);
         }
 
         .sidebar-user {
@@ -167,7 +190,7 @@
 
         /* Header */
         .content-header {
-            background-color: var(--white);
+            background-color: var(--header-bg);
             padding: 0 25px;
             height: var(--headerHeight);
             display: flex;
@@ -177,12 +200,13 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: background-color 0.3s ease;
         }
 
         .content-header h1 {
             font-size: 1.5rem;
             font-weight: 600;
-            color: var(--dark);
+            color: var(--text-color);
             margin: 0;
         }
 
@@ -190,6 +214,27 @@
             display: flex;
             align-items: center;
             gap: 15px;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.1);
         }
 
         /* Content */
@@ -215,6 +260,15 @@
             color: #721c24;
             background-color: #f8d7da;
             border-color: #f5c6cb;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radiusSmall);
+            box-shadow: var(--shadowValue);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         /* Responsive */
@@ -267,7 +321,7 @@
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body class="{% if session.user_role == 'master' %}user-role-master{% endif %}">
+<body class="{% if session.user_role == 'master' %}user-role-master{% endif %}" data-theme="light">
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
@@ -350,7 +404,11 @@
         <div class="content-header">
             <h1>{% block page_title %}Página{% endblock %}</h1>
             <div class="header-actions">
-                <!-- Aqui podemos adicionar botões de ação, notificações, etc. -->
+                <!-- Theme Toggle Button -->
+                <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <!-- Current Time -->
                 <span id="current-time"></span>
             </div>
         </div>
@@ -369,6 +427,38 @@
     </div>
     
     <script>
+        // Theme Toggle Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const themeIcon = themeToggle.querySelector('i');
+            
+            // Verificar tema salvo no localStorage
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            body.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            // Alternar tema
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+            
+            function updateThemeIcon(theme) {
+                if (theme === 'light') {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                } else {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            }
+        });
+        
         // Atualizar hora atual
         function updateCurrentTime() {
             const now = new Date();
