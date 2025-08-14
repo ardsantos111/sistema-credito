@@ -15,9 +15,5 @@
       "src": "/(.*)",
       "dest": "app.py"
     }
-  ],
-  "env": {
-    "SECRET_KEY": "@secret-key",
-    "DATABASE_URL": "@database-url"
-  }
+  ]
 }
