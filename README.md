@@ -18,37 +18,24 @@ Esta é uma aplicação Flask para gerenciar vendas e pagamentos.
 
 2. **Configure o banco de dados:**
 
-   ### Usando Supabase (recomendado)
-   
-   - Crie uma conta no [Supabase](https://supabase.io/) e um novo projeto.
-   - Obtenha as credenciais de conexão do seu projeto Supabase.
-   - Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo:
-   
-     ```
-     SECRET_KEY='sua_chave_super_secreta'
-     DATABASE_URL='postgresql://postgres:SUA_SENHA@db.seu_projeto.supabase.co:5432/postgres'
-     ```
-   
-   - Você também pode copiar o arquivo `.env.example` e atualizar com suas credenciais:
-   
-     ```bash
-     cp .env.example .env
-     ```
+   ### Para uso local:
+   Certifique-se de que você tenha um banco de dados PostgreSQL em execução.
+   Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo:
 
-   ### Usando PostgreSQL local
-   
-   - Certifique-se de que você tenha um banco de dados PostgreSQL em execução.
-   - Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo:
-   
-     ```
-     SECRET_KEY='sua_chave_super_secreta'
-     DATABASE_URL='postgresql://usuario:senha@localhost:5432/banco_de_dados'
-     ```
+   ```
+   SECRET_KEY='sua_chave_super_secreta'
+   DATABASE_URL='postgresql://usuario:senha@localhost:5432/banco_de_dados'
+   ```
+
+   ### Para uso na Vercel:
+   Configure as variáveis de ambiente no painel do Vercel:
+   - `SECRET_KEY`: Uma chave secreta segura
+   - `DATABASE_URL`: URL de conexão com o banco de dados PostgreSQL
 
 3. **Configure o banco de dados:**
 
    - Execute o script de configuração do banco de dados:
-   
+
      ```bash
      python setup_database.py
      ```
@@ -80,3 +67,14 @@ Atualmente estamos trabalhando na **Categoria 1: Interface do Usuário**.
 ## Implantação na Vercel
 
 Ao implantar na Vercel, certifique-se de definir as variáveis de ambiente `SECRET_KEY` e `DATABASE_URL` nas configurações do projeto Vercel.
+
+### Variáveis de Ambiente Necessárias:
+
+1. `SECRET_KEY`: Uma chave secreta segura para proteção de sessões
+2. `DATABASE_URL`: URL de conexão com o banco de dados PostgreSQL
+
+## Segurança
+
+- Nunca commite arquivos `.env` contendo credenciais reais
+- Use o arquivo `.gitignore` para evitar que credenciais sejam expostas
+- Sempre use variáveis de ambiente para configurações sensíveis em produção
