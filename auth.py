@@ -1,19 +1,12 @@
 import pg8000.dbapi
 from urllib.parse import urlparse, unquote
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 import os
+from dotenv import load_dotenv
+from datetime import datetime
 
-# Read directly from .env file
-def load_env_vars():
-    env_file = 'C:/Users/ardsa/Downloads/crediario_app/.env'
-    if os.path.exists(env_file):
-        with open(env_file, 'r') as f:
-            for line in f:
-                if line.strip() and not line.startswith('#'):
-                    key, value = line.strip().split('=', 1)
-                    os.environ[key] = value
-
-load_env_vars()
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
 class AppUser:
     def __init__(self, id, email, empresa_id, role, ativo):
@@ -40,16 +33,25 @@ class AppUser:
 
 def get_db_connection():
     try:
-        database_url = os.environ.get('DATABASE_URL', 'postgresql://postgres:Am461271%40am461271@db.guqrxjjrpmfbeftwmokz.supabase.co:5432/postgres')
+        # Usar credenciais corretas diretamente, ignorando variáveis de ambiente
+        database_url = "postgresql://postgres:Am461271%40am461271@db.guqrxjjrpmfbeftwmokz.supabase.co:5432/postgres"
         url = urlparse(database_url)
         decoded_password = unquote(url.password) if url.password else None
+        
+        # Criar contexto SSL
+        import ssl
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
         
         return pg8000.dbapi.connect(
             user=url.username,
             password=decoded_password,
             host=url.hostname,
             port=url.port,
-            database=url.path[1:]
+            database=url.path[1:],
+            timeout=30,
+            ssl_context=ssl_context
         )
     except Exception as e:
         print(f"Erro na conexão com o banco: {str(e)}")
@@ -184,7 +186,6 @@ def update_last_access(user_id):
             return
             
         cur = conn.cursor()
-        from datetime import datetime
         cur.execute("""
             UPDATE app_users 
             SET ultimo_acesso = %s 
@@ -296,25 +297,46 @@ if __name__ == "__main__":
     user = authenticate_user("master@sistema.com", "Master123@")
     if user:
         print(f"✓ Usuário autenticado: {user.email} (Role: {user.role})")
+        
+        # Testar carga de usuário
+        print("\nTestando carga de usuário...")
+        loaded_user = load_user(user.id)
+        if loaded_user:
+            print(f"✓ Usuário carregado: {loaded_user.email} (Role: {loaded_user.role})")
+        else:
+            print("✗ Falha ao carregar usuário")
+            
+        # Testar empresas do usuário
+        print("\nTestando empresas do usuário...")
+        companies = get_user_companies(user.id)
+        print(f"✓ Encontradas {len(companies)} empresas para o usuário")
+        for company in companies:
+            print(f"  - {company[1]} ({company[2]})")
+            
+        # Testar atualização de último acesso
+        print("\nTestando atualização de último acesso...")
+        update_last_access(user.id)
+        print("✓ Último acesso atualizado")
+        
+        # Testar criação de usuário
+        print("\nTestando criação de usuário...")
+        password_hash = generate_password_hash("Test123@")
+        user_id = create_user("test@empresa.com", password_hash, "vendedor")
+        if user_id:
+            print(f"✓ Usuário criado com ID {user_id}")
+        else:
+            print("✗ Falha ao criar usuário (pode já existir)")
+            
+        # Testar permissões
+        print("\nTestando permissões...")
+        has_permission = user_has_permission(user.id, "criar_venda")
+        print(f"✓ Usuário tem permissão 'criar_venda': {has_permission}")
+        
     else:
         print("✗ Falha na autenticação!")
+    
+    print("\nTeste concluído!")
 
-def get_db_connection():
-    try:
-        database_url = os.environ.get('DATABASE_URL', 'postgresql://postgres:Am461271%40am461271@db.guqrxjjrpmfbeftwmokz.supabase.co:5432/postgres')
-        url = urlparse(database_url)
-        decoded_password = unquote(url.password) if url.password else None
-        
-        return pg8000.dbapi.connect(
-            user=url.username,
-            password=decoded_password,
-            host=url.hostname,
-            port=url.port,
-            database=url.path[1:]
-        )
-    except Exception as e:
-        print(f"Erro na conexão com o banco: {str(e)}")
-        return None
 
 def authenticate_user(email, password):
     """
